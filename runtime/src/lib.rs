@@ -24,17 +24,19 @@ use runtime_primitives::transaction_validity::TransactionValidity;
 use runtime_primitives::{create_runtime_str, generic, ApplyResult};
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
+use support::{construct_runtime, parameter_types};
 #[cfg(feature = "std")]
 use version::NativeVersion;
 use version::RuntimeVersion;
 
 // A few exports that help ease life for downstream crates.
-pub use balances::Call as BalancesCall;
-#[cfg(any(feature = "std", test))]
-pub use runtime_primitives::BuildStorage;
-pub use runtime_primitives::{Perbill, Permill};
-pub use support::{construct_runtime, parameter_types, StorageValue};
-pub use timestamp::Call as TimestampCall;
+// Note: removed these becase they were causing confusion
+// pub use balances::Call as BalancesCall;
+// #[cfg(any(feature = "std", test))]
+// pub use runtime_primitives::BuildStorage;
+// pub use runtime_primitives::{Perbill, Permill};
+// pub use support::{construct_runtime, parameter_types, StorageValue};
+// pub use timestamp::Call as TimestampCall;
 
 /// Alias to the signature scheme used for Aura authority signatures.
 pub type AuraSignature = ed25519::Signature;
