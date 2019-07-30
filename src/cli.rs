@@ -46,8 +46,6 @@ fn load_spec(id: &str) -> Result<Option<ChainSpec<GenesisConfig>>, String> {
     }
 }
 
-// TODO: just implement IntoExit for a wrapper type wrapping Future<()>
-
 // A type that can be converted to a future. The substrate chain will shut down when the future
 // completes.
 struct Exit;
