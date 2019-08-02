@@ -87,17 +87,39 @@ fn testnet_genesis(
 }
 
 /// Derive Aura key using SchnorrRistrettoHDKD on a static secret
-/// (substrate_primitives::crypto::DEV_PHRASE) and a single HDKD junction derived
-/// from `s`.
+/// (substrate_primitives::crypto::DEV_PHRASE) and a single hard junction derived from `s`.
 fn authority_key(s: &str) -> AuraId {
-    ed25519::Pair::from_standard_components(DEV_PHRASE, None, once(DeriveJunction::soft(s)))
-        .unwrap()
+    ed25519::Pair::from_standard_components(DEV_PHRASE, None, once(DeriveJunction::hard(s)))
+        .expect("err generating authority key")
         .public()
 }
 
 /// Same as authority_key, but for an AccountID
 fn account_key(s: &str) -> AccountId {
-    sr25519::Pair::from_standard_components(DEV_PHRASE, None, once(DeriveJunction::soft(s)))
-        .unwrap()
+    sr25519::Pair::from_standard_components(DEV_PHRASE, None, once(DeriveJunction::hard(s)))
+        .expect("err generating account key")
         .public()
+}
+
+#[cfg(test)]
+mod test {
+    use super::{account_key, authority_key};
+
+    const KEY_DERIVE_NAMES: [&str; 5] = ["Alice", "/Alice", "//Alice", "1", "0"];
+
+    #[test]
+    fn derive_account_key() {
+        for name in &KEY_DERIVE_NAMES {
+            dbg!(name);
+            account_key(name);
+        }
+    }
+
+    #[test]
+    fn derive_authority_key() {
+        for name in &KEY_DERIVE_NAMES {
+            dbg!(name);
+            authority_key(name);
+        }
+    }
 }
