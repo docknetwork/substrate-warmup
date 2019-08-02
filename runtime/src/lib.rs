@@ -8,35 +8,24 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use client::{
+use parity_codec::{Decode, Encode};
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
+use sr_primitives::traits::{self, BlakeTwo256, Block as BlockT, NumberFor, StaticLookup, Verify};
+use sr_primitives::transaction_validity::TransactionValidity;
+use sr_primitives::{create_runtime_str, generic, ApplyResult};
+use sr_std::prelude::*;
+#[cfg(feature = "std")]
+use sr_version::NativeVersion;
+use sr_version::RuntimeVersion;
+use srml_support::{construct_runtime, parameter_types};
+use substrate_client::{
     block_builder::api::{self as block_builder_api, CheckInherentsResult, InherentData},
     impl_runtime_apis, runtime_api,
 };
-use parity_codec::{Decode, Encode};
 #[cfg(feature = "std")]
-use primitives::bytes;
-use primitives::{ed25519, sr25519, OpaqueMetadata};
-use rstd::prelude::*;
-use runtime_primitives::traits::{
-    self, BlakeTwo256, Block as BlockT, NumberFor, StaticLookup, Verify,
-};
-use runtime_primitives::transaction_validity::TransactionValidity;
-use runtime_primitives::{create_runtime_str, generic, ApplyResult};
-#[cfg(feature = "std")]
-use serde::{Deserialize, Serialize};
-use support::{construct_runtime, parameter_types};
-#[cfg(feature = "std")]
-use version::NativeVersion;
-use version::RuntimeVersion;
-
-// A few exports that help ease life for downstream crates.
-// Note: removed these becase they were causing confusion
-// pub use balances::Call as BalancesCall;
-// #[cfg(any(feature = "std", test))]
-// pub use runtime_primitives::BuildStorage;
-// pub use runtime_primitives::{Perbill, Permill};
-// pub use support::{construct_runtime, parameter_types, StorageValue};
-// pub use timestamp::Call as TimestampCall;
+use substrate_primitives::bytes;
+use substrate_primitives::{ed25519, sr25519, OpaqueMetadata};
 
 /// Alias to the signature scheme used for Aura authority signatures.
 pub type AuraSignature = ed25519::Signature;
@@ -51,7 +40,7 @@ pub type AccountId = <AccountSignature as Verify>::Signer;
 pub type AccountSignature = sr25519::Signature;
 
 /// A hash of some data used by the chain.
-pub type Hash = primitives::H256;
+pub type Hash = substrate_primitives::H256;
 
 /// Index of a block number in the chain.
 pub type BlockNumber = u64;
@@ -79,7 +68,11 @@ pub mod opaque {
     #[cfg(feature = "std")]
     impl std::fmt::Debug for UncheckedExtrinsic {
         fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-            write!(fmt, "{}", primitives::hexdisplay::HexDisplay::from(&self.0))
+            write!(
+                fmt,
+                "{}",
+                substrate_primitives::hexdisplay::HexDisplay::from(&self.0)
+            )
         }
     }
     impl traits::Extrinsic for UncheckedExtrinsic {
@@ -120,7 +113,7 @@ parameter_types! {
     pub const BlockHashCount: BlockNumber = 250;
 }
 
-impl system::Trait for Runtime {
+impl srml_system::Trait for Runtime {
     /// The identifier used to distinguish between accounts.
     type AccountId = AccountId;
     /// The lookup mechanism to get account ID from whatever is passed in dispatchers.
@@ -145,17 +138,17 @@ impl system::Trait for Runtime {
     type BlockHashCount = BlockHashCount;
 }
 
-impl aura::Trait for Runtime {
+impl srml_aura::Trait for Runtime {
     type HandleReport = ();
     type AuthorityId = AuraId;
 }
 
-impl indices::Trait for Runtime {
+impl srml_indices::Trait for Runtime {
     /// The type for recording indexing into the account enumeration. If this ever overflows, there
     /// will be problems!
     type AccountIndex = u32;
     /// Use the standard means of resolving an index hint from an id.
-    type ResolveHint = indices::SimpleResolveHint<Self::AccountId, Self::AccountIndex>;
+    type ResolveHint = srml_indices::SimpleResolveHint<Self::AccountId, Self::AccountIndex>;
     /// Determine whether an account is dead.
     type IsDeadAccount = Balances;
     /// The ubiquitous event type.
@@ -165,7 +158,7 @@ impl indices::Trait for Runtime {
 parameter_types! {
     pub const MinimumPeriod: u64 = 5;
 }
-impl timestamp::Trait for Runtime {
+impl srml_timestamp::Trait for Runtime {
     /// A timestamp: seconds since the unix epoch.
     type Moment = u64;
     type OnTimestampSet = Aura;
@@ -180,7 +173,7 @@ parameter_types! {
     pub const TransactionByteFee: u128 = 0;
 }
 
-impl balances::Trait for Runtime {
+impl srml_balances::Trait for Runtime {
     /// The type for recording an account's balance.
     type Balance = Balance;
     /// What to do if an account's free balance gets zeroed.
@@ -200,7 +193,7 @@ impl balances::Trait for Runtime {
     type TransactionByteFee = TransactionByteFee;
 }
 
-impl sudo::Trait for Runtime {
+impl srml_sudo::Trait for Runtime {
     /// The ubiquitous event type.
     type Event = Event;
     type Proposal = Call;
@@ -211,6 +204,7 @@ impl template::Trait for Runtime {
     type Event = Event;
 }
 
+use srml_system as system; // https://github.com/paritytech/substrate/issues/3295
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -218,18 +212,17 @@ construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic
 	{
 		System: system::{Module, Call, Storage, Config, Event},
-		Timestamp: timestamp::{Module, Call, Storage, Inherent},
-		Aura: aura::{Module, Config<T>, Inherent(Timestamp)},
-		Indices: indices::{default, Config<T>},
-		Balances: balances,
-		Sudo: sudo,
-		// Used for the module template in `./template.rs`
+		Timestamp: srml_timestamp::{Module, Call, Storage, Inherent},
+		Aura: srml_aura::{Module, Config<T>, Inherent(Timestamp)},
+		Indices: srml_indices::{default, Config<T>},
+		Balances: srml_balances,
+		Sudo: srml_sudo,
 		TemplateModule: template::{Module, Call, Storage, Event<T>},
 	}
 );
 
 /// The type used as a helper for interpreting the sender of transactions.
-type Context = system::ChainContext<Runtime>;
+type Context = srml_system::ChainContext<Runtime>;
 /// The address format for describing accounts.
 type Address = <Indices as StaticLookup>::Source;
 /// Block header type as expected by this runtime.
@@ -244,7 +237,8 @@ pub type UncheckedExtrinsic =
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Nonce, Call>;
 /// Executive: handles dispatch to the various modules.
-pub type Executive = executive::Executive<Runtime, Block, Context, Balances, Runtime, AllModules>;
+pub type Executive =
+    srml_executive::Executive<Runtime, Block, Context, Balances, Runtime, AllModules>;
 
 // Implement our runtime API endpoints. This is just a bunch of proxying.
 impl_runtime_apis! {
@@ -296,7 +290,7 @@ impl_runtime_apis! {
         }
     }
 
-    impl consensus_aura::AuraApi<Block, AuraId> for Runtime {
+    impl substrate_consensus_aura_primitives::AuraApi<Block, AuraId> for Runtime {
         fn slot_duration() -> u64 {
             Aura::slot_duration()
         }
@@ -305,7 +299,7 @@ impl_runtime_apis! {
         }
     }
 
-    impl offchain_primitives::OffchainWorkerApi<Block> for Runtime {
+    impl substrate_offchain_primitives::OffchainWorkerApi<Block> for Runtime {
         fn offchain_worker(n: NumberFor<Block>) {
             Executive::offchain_worker(n)
         }

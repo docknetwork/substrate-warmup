@@ -6,15 +6,15 @@
 
 /// For more guidance on Substrate modules, see the example module
 /// https://github.com/paritytech/substrate/blob/master/srml/example/src/lib.rs
-use support::{decl_event, decl_module, decl_storage, dispatch::Result, StorageValue};
-use system::ensure_signed;
+use srml_support::{decl_event, decl_module, decl_storage, dispatch::Result, StorageValue};
+use srml_system::ensure_signed;
 
 /// The module's configuration trait.
-pub trait Trait: system::Trait {
+pub trait Trait: srml_system::Trait {
     // TODO: Add other types and constants required configure this module.
 
     /// The overarching event type.
-    type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+    type Event: From<Event<Self>> + Into<<Self as srml_system::Trait>::Event>;
 }
 
 // This module's storage items.
@@ -27,7 +27,8 @@ decl_storage! {
     }
 }
 
-// The module's dispatchable functions.
+use srml_system as system; // https://github.com/paritytech/substrate/issues/3295
+                           // The module's dispatchable functions.
 decl_module! {
     /// The module declaration.
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {
@@ -56,7 +57,7 @@ decl_module! {
 decl_event!(
     pub enum Event<T>
     where
-        AccountId = <T as system::Trait>::AccountId,
+        AccountId = <T as srml_system::Trait>::AccountId,
     {
         // Just a dummy event.
         // Event `Something` is declared with a parameter of the type `u32` and `AccountId`
@@ -70,13 +71,13 @@ decl_event!(
 mod tests {
     use super::*;
 
-    use primitives::{Blake2Hasher, H256};
-    use runtime_io::with_externalities;
+    use sr_io::with_externalities;
     use sr_primitives::{
         testing::Header,
         traits::{BlakeTwo256, IdentityLookup},
     };
-    use support::{assert_ok, impl_outer_origin, parameter_types};
+    use srml_support::{assert_ok, impl_outer_origin, parameter_types};
+    use substrate_primitives::{Blake2Hasher, H256};
 
     impl_outer_origin! {
         pub enum Origin for Test {}
@@ -90,7 +91,7 @@ mod tests {
     parameter_types! {
         pub const BlockHashCount: u64 = 250;
     }
-    impl system::Trait for Test {
+    impl srml_system::Trait for Test {
         type Origin = Origin;
         type Index = u64;
         type BlockNumber = u64;
@@ -110,8 +111,8 @@ mod tests {
 
     // This function basically just builds a genesis storage key/value store according to
     // our desired mockup.
-    fn new_test_ext() -> runtime_io::TestExternalities<Blake2Hasher> {
-        system::GenesisConfig::default()
+    fn new_test_ext() -> sr_io::TestExternalities<Blake2Hasher> {
+        srml_system::GenesisConfig::default()
             .build_storage::<Test>()
             .unwrap()
             .0
