@@ -3,13 +3,13 @@
 //! "A configuration of a chain. Can be used to build a genesis block."
 
 use core::iter::once;
-use primitives::crypto::{DeriveJunction, DEV_PHRASE};
-use primitives::{ed25519, sr25519, Pair};
-use substrate_service::ChainSpec;
-use substrate_warmup_runtime::{
+use runtime::{
     AccountId, AuraConfig, AuraId, BalancesConfig, GenesisConfig, IndicesConfig, SudoConfig,
     SystemConfig, WASM_BINARY,
 };
+use substrate_primitives::crypto::{DeriveJunction, DEV_PHRASE};
+use substrate_primitives::{ed25519, sr25519, Pair};
+use substrate_service::ChainSpec;
 
 /// Generate as chain spec representing the dev chain.
 pub fn dev() -> ChainSpec<GenesisConfig> {

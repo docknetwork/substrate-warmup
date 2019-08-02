@@ -1,30 +1,30 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over Substrate service.
 
-use basic_authorship::ProposerFactory;
-use consensus::{import_queue, start_aura, AuraImportQueue, SlotDuration};
 use futures::prelude::*;
-use inherents::InherentDataProviders;
 use log::info;
-use network::{config::DummyFinalityProofRequestBuilder, construct_simple_protocol};
-use primitives::{ed25519::Pair, Pair as PairT};
+use runtime::{self, opaque::Block, GenesisConfig, RuntimeApi, WASM_BINARY};
 use std::sync::Arc;
+use substrate_basic_authorship::ProposerFactory;
 use substrate_client::{self as client, LongestChain};
+use substrate_consensus_aura::{import_queue, start_aura, AuraImportQueue, SlotDuration};
 use substrate_executor::native_executor_instance;
+use substrate_inherents::InherentDataProviders;
+use substrate_network::{config::DummyFinalityProofRequestBuilder, construct_simple_protocol};
+use substrate_primitives::{ed25519::Pair, Pair as PairT};
 use substrate_service::construct_service_factory;
 use substrate_service::{
     error::Error as ServiceError, FactoryFullConfiguration, FullBackend, FullClient,
     FullComponents, FullExecutor, LightBackend, LightClient, LightComponents, LightExecutor,
 };
-use substrate_warmup_runtime::{self, opaque::Block, GenesisConfig, RuntimeApi, WASM_BINARY};
-use transaction_pool::{self, txpool::Pool as TransactionPool};
+use substrate_transaction_pool::{self, txpool::Pool as TransactionPool};
 
 pub use substrate_executor::NativeExecutor;
 
 // Our native executor instance.
 native_executor_instance!(
 	pub Executor,
-	substrate_warmup_runtime::api::dispatch,
-    substrate_warmup_runtime::native_version,
+	runtime::api::dispatch,
+    runtime::native_version,
 	WASM_BINARY
 );
 
@@ -44,17 +44,23 @@ construct_service_factory! {
         RuntimeApi = RuntimeApi,
         NetworkProtocol = NodeProtocol { |config| Ok(NodeProtocol::new()) },
         RuntimeDispatch = Executor,
-        FullTransactionPoolApi = transaction_pool::ChainApi<
+        FullTransactionPoolApi = substrate_transaction_pool::ChainApi<
             client::Client<FullBackend<Self>, FullExecutor<Self>, Block, RuntimeApi>,
             Block
         > {
-            |config, client| Ok(TransactionPool::new(config, transaction_pool::ChainApi::new(client)))
+            |config, client| Ok(TransactionPool::new(
+                config,
+                substrate_transaction_pool::ChainApi::new(client),
+            ))
         },
-        LightTransactionPoolApi = transaction_pool::ChainApi<
+        LightTransactionPoolApi = substrate_transaction_pool::ChainApi<
             client::Client<LightBackend<Self>, LightExecutor<Self>, Block, RuntimeApi>,
-            Block
+            Block,
         > {
-            |config, client| Ok(TransactionPool::new(config, transaction_pool::ChainApi::new(client)))
+            |config, client| Ok(TransactionPool::new(
+                config,
+                substrate_transaction_pool::ChainApi::new(client),
+            ))
         },
         Genesis = GenesisConfig,
         Configuration = NodeConfig,

@@ -20,32 +20,27 @@ parking_lot = "0.8.0"
 parity-codec = "4.1.1"
 trie-root = "0.14.0"
 
-[dependencies.basic-authorship]
-git = 'https://github.com/paritytech/substrate.git'
-package = 'substrate-basic-authorship'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
-
-[dependencies.consensus]
-git = 'https://github.com/paritytech/substrate.git'
-package = 'substrate-consensus-aura'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
-
-[dependencies.inherents]
-git = 'https://github.com/paritytech/substrate.git'
-package = 'substrate-inherents'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
-
-[dependencies.network]
-git = 'https://github.com/paritytech/substrate.git'
-package = 'substrate-network'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
-
-[dependencies.substrate-warmup-runtime]
+[dependencies.runtime]
 path = 'runtime'
 
-[dependencies.primitives]
+[dependencies.substrate-basic-authorship]
 git = 'https://github.com/paritytech/substrate.git'
-package = 'substrate-primitives'
+rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+
+[dependencies.substrate-consensus-aura]
+git = 'https://github.com/paritytech/substrate.git'
+rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+
+[dependencies.substrate-inherents]
+git = 'https://github.com/paritytech/substrate.git'
+rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+
+[dependencies.substrate-network]
+git = 'https://github.com/paritytech/substrate.git'
+rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+
+[dependencies.substrate-primitives]
+git = 'https://github.com/paritytech/substrate.git'
 rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
 
 [dependencies.sr-io]
@@ -68,9 +63,8 @@ rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
 git = 'https://github.com/paritytech/substrate.git'
 rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
 
-[dependencies.transaction-pool]
+[dependencies.substrate-transaction-pool]
 git = 'https://github.com/paritytech/substrate.git'
-package = 'substrate-transaction-pool'
 rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
 
 [build-dependencies]

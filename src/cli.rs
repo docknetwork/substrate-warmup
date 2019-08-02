@@ -2,12 +2,12 @@ use crate::chain_spec;
 use crate::service;
 use futures::{future, sync::oneshot, Future};
 use log::info;
+use runtime::GenesisConfig;
 use std::cell::RefCell;
 pub use substrate_cli::{error, IntoExit, VersionInfo};
 use substrate_cli::{parse_and_execute, NoCustom};
 use substrate_service::ChainSpec;
 use substrate_service::ServiceFactory;
-use substrate_warmup_runtime::GenesisConfig;
 use tokio::runtime::Runtime;
 
 /// Parse command line arguments into service configuration.

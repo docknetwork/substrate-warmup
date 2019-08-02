@@ -1,5 +1,5 @@
 [package]
-name = "substrate-warmup-runtime"
+name = "runtime"
 version = "2.0.0"
 authors = ["Anonymous"]
 edition = "2018"
@@ -8,10 +8,6 @@ edition = "2018"
 serde = { version = "1.0", optional = true, features = ["derive"] }
 safe-mix = { version = "1.0", default-features = false }
 parity-codec = { version = "4.1.1", default-features = false, features = ["derive"] }
-
-# [dependencies.substrate-module-template]
-# default_features = false
-# path = '../../substrate-module-template/'
 
 [dependencies.aura]
 default_features = false
@@ -31,26 +27,11 @@ git = 'https://github.com/paritytech/substrate.git'
 package = 'substrate-client'
 rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
 
-# [dependencies.consensus]
-# consensus-aura = { package = "substrate-consensus-aura-primitives", path = "../../core/consensus/aura/primitives", default_features = false }
-
-# [dependencies.consensus]
-# default_features = false
-# git = 'https://github.com/paritytech/substrate.git'
-# package = 'srml-consensus'
-# rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
-
 [dependencies.consensus-aura]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
 package = 'substrate-consensus-aura-primitives'
 rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
-
-# [dependencies.consensus_authorities]
-# default-features = false
-# git = 'https://github.com/paritytech/substrate.git'
-# package = 'substrate-consensus-authorities'
-# rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
 
 [dependencies.executive]
 default_features = false
@@ -123,23 +104,6 @@ default_features = false
 git = 'https://github.com/paritytech/substrate.git'
 package = 'sr-version'
 rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
-
-# rstd = { package = "sr-std", path = "../../core/sr-std", default_features = false }
-# runtime-io = { package = "sr-io", path = "../../core/sr-io", default_features = false }
-# version = { package = "sr-version", path = "../../core/sr-version", default_features = false }
-# support = { package = "srml-support", path = "../../srml/support", default_features = false }
-# primitives = { package = "substrate-primitives", path = "../../core/primitives", default_features = false }
-# balances = { package = "srml-balances", path = "../../srml/balances", default_features = false }
-# # aura = { package = "srml-aura", path = "../../srml/aura", default_features = false }
-# executive = { package = "srml-executive", path = "../../srml/executive", default_features = false }
-# indices = { package = "srml-indices", path = "../../srml/indices", default_features = false }
-# system = { package = "srml-system", path = "../../srml/system", default_features = false }
-# timestamp = { package = "srml-timestamp", path = "../../srml/timestamp", default_features = false }
-# sudo = { package = "srml-sudo", path = "../../srml/sudo", default_features = false }
-# sr-primitives = { path = "../../core/sr-primitives", default_features = false }
-# client = { package = "substrate-client", path = "../../core/client", default_features = false }
-# consensus-aura = { package = "substrate-consensus-aura-primitives", path = "../../core/consensus/aura/primitives", default_features = false }
-# offchain-primitives = { package = "substrate-offchain-primitives", path = "../../core/offchain/primitives", default-features = false }
 
 [build-dependencies]
 wasm-builder-runner = { package = "substrate-wasm-builder-runner", version = "1.0.2" }
