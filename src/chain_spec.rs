@@ -68,13 +68,13 @@ fn testnet_genesis(
             code: WASM_BINARY.to_vec(),
             changes_trie_config: Default::default(),
         }),
-        aura: Some(AuraConfig {
+        srml_aura: Some(AuraConfig {
             authorities: initial_authorities.clone(),
         }),
-        indices: Some(IndicesConfig {
+        srml_indices: Some(IndicesConfig {
             ids: endowed_accounts.clone(),
         }),
-        balances: Some(BalancesConfig {
+        srml_balances: Some(BalancesConfig {
             balances: endowed_accounts
                 .iter()
                 .cloned()
@@ -82,7 +82,7 @@ fn testnet_genesis(
                 .collect(),
             vesting: vec![],
         }),
-        sudo: Some(SudoConfig { key: root_key }),
+        srml_sudo: Some(SudoConfig { key: root_key }),
     }
 }
 
