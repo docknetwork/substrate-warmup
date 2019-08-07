@@ -27,9 +27,6 @@ use substrate_client::{
 use substrate_primitives::bytes;
 use substrate_primitives::{ed25519, OpaqueMetadata};
 
-/// Alias to the signature scheme used for Aura authority signatures.
-pub type AuraSignature = ed25519::Signature;
-
 /// The Ed25519 pub key of an session that belongs to an Aura authority of the chain.
 pub type AuraId = ed25519::Public;
 
@@ -37,19 +34,19 @@ pub type AuraId = ed25519::Public;
 pub type AccountId = <AccountSignature as Verify>::Signer;
 
 /// The type used by authorities to prove their ID.
-pub type AccountSignature = ed25519::Signature;
+type AccountSignature = ed25519::Signature;
 
 /// A hash of some data used by the chain.
-pub type Hash = substrate_primitives::H256;
+type Hash = substrate_primitives::H256;
 
 /// Index of a block number in the chain.
-pub type BlockNumber = u64;
+type BlockNumber = u64;
 
 /// Index of an account's extrinsic in the chain.
-pub type Nonce = u64;
+type Nonce = u64;
 
 /// Balance type for the node.
-pub type Balance = u128;
+type Balance = u128;
 
 /// Used for the module template in `./template.rs`
 mod template;
@@ -81,17 +78,13 @@ pub mod opaque {
         }
     }
     /// Opaque block header type.
-    pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+    type Header = generic::Header<BlockNumber, BlakeTwo256>;
     /// Opaque block type.
     pub type Block = generic::Block<Header, UncheckedExtrinsic>;
-    /// Opaque block identifier type.
-    pub type BlockId = generic::BlockId<Block>;
-    /// Opaque session key type.
-    pub type SessionKey = AuraId;
 }
 
 /// This runtime version.
-pub const VERSION: RuntimeVersion = RuntimeVersion {
+const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("node-template"),
     impl_name: create_runtime_str!("node-template"),
     authoring_version: 3,
@@ -226,19 +219,14 @@ type Context = srml_system::ChainContext<Runtime>;
 /// The address format for describing accounts.
 type Address = <Indices as StaticLookup>::Source;
 /// Block header type as expected by this runtime.
-pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+type Header = generic::Header<BlockNumber, BlakeTwo256>;
 /// Block type as expected by this runtime.
-pub type Block = generic::Block<Header, UncheckedExtrinsic>;
-/// BlockId type as expected by this runtime.
-pub type BlockId = generic::BlockId<Block>;
+type Block = generic::Block<Header, UncheckedExtrinsic>;
 /// Unchecked extrinsic type as expected by this runtime.
-pub type UncheckedExtrinsic =
+type UncheckedExtrinsic =
     generic::UncheckedMortalCompactExtrinsic<Address, Nonce, Call, AccountSignature>;
-/// Extrinsic type that has already been checked.
-pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Nonce, Call>;
 /// Executive: handles dispatch to the various modules.
-pub type Executive =
-    srml_executive::Executive<Runtime, Block, Context, Balances, Runtime, AllModules>;
+type Executive = srml_executive::Executive<Runtime, Block, Context, Balances, Runtime, AllModules>;
 
 // Implement our runtime API endpoints. This is just a bunch of proxying.
 impl_runtime_apis! {
