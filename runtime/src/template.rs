@@ -22,8 +22,12 @@ decl_storage! {
     trait Store for Module<T: Trait> as TemplateModule {
         // Just a dummy storage item.
         // Here we are declaring a StorageValue, `Something` as a Option<u32>
-        // `get(something)` is the default getter which returns either the stored `u32` or `None` if nothing stored
-        Something get(something): Option<u32>;
+        Something: u32;
+
+        // decl_storage! implements special behavoiur for Option<T> setters.
+        // You can't call SomethingMagic::set(Some(0)). Instead you must call
+        // SomethingMagic::set(0). SomethingMagic::set() takes an `impl Borrow<u32>`.
+        SomethingMagic: Option<u32>;
     }
 }
 
@@ -46,6 +50,8 @@ decl_module! {
             // TODO: Code to execute when something calls this.
             // For example: the following line stores the passed in u32 in the storage
             Something::put(something);
+
+            SomethingMagic::put(something);
 
             // here we are raising the Something event
             Self::deposit_event(RawEvent::SomethingStored(something, who));
@@ -122,11 +128,14 @@ mod tests {
     #[test]
     fn it_works_for_default_value() {
         with_externalities(&mut new_test_ext(), || {
+            assert_eq!(Something::get(), 0);
+            assert_eq!(SomethingMagic::get(), None);
             // Just a dummy test for the dummy funtion `do_something`
             // calling the `do_something` function with a value 42
             assert_ok!(TemplateModule::do_something(Origin::signed(1), 42));
             // asserting that the stored value is equal to what we stored
-            assert_eq!(TemplateModule::something(), Some(42));
+            assert_eq!(Something::get(), 42);
+            assert_eq!(SomethingMagic::get(), Some(42));
         });
     }
 }
