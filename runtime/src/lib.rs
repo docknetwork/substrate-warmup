@@ -25,7 +25,7 @@ use substrate_client::{
 };
 #[cfg(feature = "std")]
 use substrate_primitives::bytes;
-use substrate_primitives::{ed25519, sr25519, OpaqueMetadata};
+use substrate_primitives::{ed25519, OpaqueMetadata};
 
 /// Alias to the signature scheme used for Aura authority signatures.
 pub type AuraSignature = ed25519::Signature;
@@ -37,7 +37,7 @@ pub type AuraId = ed25519::Public;
 pub type AccountId = <AccountSignature as Verify>::Signer;
 
 /// The type used by authorities to prove their ID.
-pub type AccountSignature = sr25519::Signature;
+pub type AccountSignature = ed25519::Signature;
 
 /// A hash of some data used by the chain.
 pub type Hash = substrate_primitives::H256;

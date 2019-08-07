@@ -8,7 +8,7 @@ use runtime::{
     SystemConfig, WASM_BINARY,
 };
 use substrate_primitives::crypto::{DeriveJunction, DEV_PHRASE};
-use substrate_primitives::{ed25519, sr25519, Pair};
+use substrate_primitives::{ed25519, Pair};
 use substrate_service::ChainSpec;
 
 /// Generate as chain spec representing the dev chain.
@@ -18,9 +18,9 @@ pub fn dev() -> ChainSpec<GenesisConfig> {
         "dev",
         || {
             testnet_genesis(
-                vec![authority_key("Alice")],
-                vec![account_key("Alice")],
-                account_key("Alice"),
+                vec![dev_pk("Alice")],
+                vec![dev_pk("Alice")],
+                dev_pk("Alice"),
             )
         },
         vec![],
@@ -38,16 +38,16 @@ pub fn local() -> ChainSpec<GenesisConfig> {
         "local_testnet",
         || {
             testnet_genesis(
-                vec![authority_key("Alice"), authority_key("Bob")],
+                vec![dev_pk("Alice"), dev_pk("Bob")],
                 vec![
-                    account_key("Alice"),
-                    account_key("Bob"),
-                    account_key("Charlie"),
-                    account_key("Dave"),
-                    account_key("Eve"),
-                    account_key("Ferdie"),
+                    dev_pk("Alice"),
+                    dev_pk("Bob"),
+                    dev_pk("Charlie"),
+                    dev_pk("Dave"),
+                    dev_pk("Eve"),
+                    dev_pk("Ferdie"),
                 ],
-                account_key("Alice"),
+                dev_pk("Alice"),
             )
         },
         vec![],
@@ -86,40 +86,23 @@ fn testnet_genesis(
     }
 }
 
-/// Derive Aura key using SchnorrRistrettoHDKD on a static secret
+/// Derive ed25519 key using SchnorrRistrettoHDKD on a static secret
 /// (substrate_primitives::crypto::DEV_PHRASE) and a single hard junction derived from `s`.
-fn authority_key(s: &str) -> AuraId {
+fn dev_pk(s: &str) -> ed25519::Public {
     ed25519::Pair::from_standard_components(DEV_PHRASE, None, once(DeriveJunction::hard(s)))
         .expect("err generating authority key")
         .public()
 }
 
-/// Same as authority_key, but for an AccountID
-fn account_key(s: &str) -> AccountId {
-    sr25519::Pair::from_standard_components(DEV_PHRASE, None, once(DeriveJunction::hard(s)))
-        .expect("err generating account key")
-        .public()
-}
-
 #[cfg(test)]
 mod test {
-    use super::{account_key, authority_key};
-
-    const KEY_DERIVE_NAMES: [&str; 5] = ["Alice", "/Alice", "//Alice", "1", "0"];
+    use super::dev_pk;
 
     #[test]
-    fn derive_account_key() {
-        for name in &KEY_DERIVE_NAMES {
+    fn derive_dev_pk() {
+        for name in &["Alice", "/Alice", "//Alice", "1", "0"] {
             dbg!(name);
-            account_key(name);
-        }
-    }
-
-    #[test]
-    fn derive_authority_key() {
-        for name in &KEY_DERIVE_NAMES {
-            dbg!(name);
-            authority_key(name);
+            dev_pk(name);
         }
     }
 }
