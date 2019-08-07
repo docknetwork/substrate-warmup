@@ -4,8 +4,7 @@
 
 use core::iter::once;
 use runtime::{
-    AccountId, AuraConfig, AuraId, BalancesConfig, GenesisConfig, IndicesConfig, SudoConfig,
-    SystemConfig, WASM_BINARY,
+    AuraConfig, BalancesConfig, GenesisConfig, IndicesConfig, SudoConfig, SystemConfig, WASM_BINARY,
 };
 use substrate_primitives::crypto::{DeriveJunction, DEV_PHRASE};
 use substrate_primitives::{ed25519, Pair};
@@ -59,9 +58,9 @@ pub fn local() -> ChainSpec<GenesisConfig> {
 }
 
 fn testnet_genesis(
-    initial_authorities: Vec<AuraId>,
-    endowed_accounts: Vec<AccountId>,
-    root_key: AccountId,
+    initial_authorities: Vec<ed25519::Public>,
+    endowed_accounts: Vec<ed25519::Public>,
+    root_key: ed25519::Public,
 ) -> GenesisConfig {
     GenesisConfig {
         system: Some(SystemConfig {

@@ -11,7 +11,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 use parity_codec::{Decode, Encode};
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sr_primitives::traits::{self, BlakeTwo256, Block as BlockT, NumberFor, StaticLookup, Verify};
+use sr_primitives::traits::{self, BlakeTwo256, Block as BlockT, NumberFor, StaticLookup};
 use sr_primitives::transaction_validity::TransactionValidity;
 use sr_primitives::{create_runtime_str, generic, ApplyResult};
 use sr_std::prelude::*;
@@ -25,31 +25,12 @@ use substrate_client::{
 };
 #[cfg(feature = "std")]
 use substrate_primitives::bytes;
-use substrate_primitives::{ed25519, OpaqueMetadata};
-
-/// The Ed25519 pub key of an session that belongs to an Aura authority of the chain.
-pub type AuraId = ed25519::Public;
-
-/// Alias to pubkey that identifies an account on the chain.
-pub type AccountId = <AccountSignature as Verify>::Signer;
-
-/// The type used by authorities to prove their ID.
-type AccountSignature = ed25519::Signature;
-
-/// A hash of some data used by the chain.
-type Hash = substrate_primitives::H256;
-
-/// Index of a block number in the chain.
-type BlockNumber = u64;
-
-/// Index of an account's extrinsic in the chain.
-type Nonce = u64;
-
-/// Balance type for the node.
-type Balance = u128;
+use substrate_primitives::{ed25519, OpaqueMetadata, H256};
 
 /// Used for the module template in `./template.rs`
 mod template;
+
+type Block = generic::Block<<Runtime as srml_system::Trait>::Header, UncheckedExtrinsic>;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -78,7 +59,7 @@ pub mod opaque {
         }
     }
     /// Opaque block header type.
-    type Header = generic::Header<BlockNumber, BlakeTwo256>;
+    type Header = generic::Header<<Runtime as srml_system::Trait>::BlockNumber, BlakeTwo256>;
     /// Opaque block type.
     pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 }
@@ -90,7 +71,7 @@ const VERSION: RuntimeVersion = RuntimeVersion {
     authoring_version: 3,
     spec_version: 4,
     impl_version: 4,
-    apis: RUNTIME_API_VERSIONS,
+    apis: RUNTIME_API_VERSIONS, // it's not clear where RUNTIME_API_VERSIONS is defined
 };
 
 /// The version infromation used to identify this runtime when compiled natively.
@@ -103,37 +84,37 @@ pub fn native_version() -> NativeVersion {
 }
 
 parameter_types! {
-    pub const BlockHashCount: BlockNumber = 250;
+    pub const ChainStateCacheSize: <Runtime as srml_system::Trait>::BlockNumber = 250;
 }
 
 impl srml_system::Trait for Runtime {
     /// The identifier used to distinguish between accounts.
-    type AccountId = AccountId;
+    type AccountId = ed25519::Public;
     /// The lookup mechanism to get account ID from whatever is passed in dispatchers.
     type Lookup = Indices;
     /// The index type for storing how many extrinsics an account has signed.
-    type Index = Nonce;
+    type Index = u64;
     /// The index type for blocks.
-    type BlockNumber = BlockNumber;
+    type BlockNumber = u64;
     /// The type for hashing blocks and tries.
-    type Hash = Hash;
+    type Hash = H256;
     /// The hashing algorithm used.
     type Hashing = BlakeTwo256;
     /// The header type.
-    type Header = generic::Header<BlockNumber, BlakeTwo256>;
+    type Header = generic::Header<Self::BlockNumber, BlakeTwo256>;
     /// The ubiquitous event type.
     type Event = Event;
     /// Update weight (to fee) multiplier per-block.
     type WeightMultiplierUpdate = ();
     /// The ubiquitous origin type.
-    type Origin = Origin;
+    type Origin = Origin; // it's unclear where Origin is defined
     /// Maximum number of block number to block hash mappings to keep (oldest pruned first).
-    type BlockHashCount = BlockHashCount;
+    type BlockHashCount = ChainStateCacheSize;
 }
 
 impl srml_aura::Trait for Runtime {
     type HandleReport = ();
-    type AuthorityId = AuraId;
+    type AuthorityId = ed25519::Public;
 }
 
 impl srml_indices::Trait for Runtime {
@@ -168,7 +149,7 @@ parameter_types! {
 
 impl srml_balances::Trait for Runtime {
     /// The type for recording an account's balance.
-    type Balance = Balance;
+    type Balance = u128;
     /// What to do if an account's free balance gets zeroed.
     type OnFreeBalanceZero = ();
     /// What to do if a new account is created.
@@ -197,6 +178,24 @@ impl template::Trait for Runtime {
     type Event = Event;
 }
 
+/// Unchecked extrinsic type as expected by this runtime.
+type UncheckedExtrinsic = generic::UncheckedMortalCompactExtrinsic<
+    <Indices as StaticLookup>::Source, // it's not clear where Indices is defined
+    <Runtime as srml_system::Trait>::Index,
+    Call,
+    ed25519::Signature,
+>;
+
+/// Executive: handles dispatch to the various modules.
+type Executive = srml_executive::Executive<
+    Runtime,
+    Block,
+    srml_system::ChainContext<Runtime>,
+    Balances,
+    Runtime,
+    AllModules,
+>;
+
 use srml_system as system; // https://github.com/paritytech/substrate/issues/3295
 construct_runtime!(
 	pub enum Runtime where
@@ -213,20 +212,6 @@ construct_runtime!(
 		TemplateModule: template::{Module, Call, Storage, Event<T>},
 	}
 );
-
-/// The type used as a helper for interpreting the sender of transactions.
-type Context = srml_system::ChainContext<Runtime>;
-/// The address format for describing accounts.
-type Address = <Indices as StaticLookup>::Source;
-/// Block header type as expected by this runtime.
-type Header = generic::Header<BlockNumber, BlakeTwo256>;
-/// Block type as expected by this runtime.
-type Block = generic::Block<Header, UncheckedExtrinsic>;
-/// Unchecked extrinsic type as expected by this runtime.
-type UncheckedExtrinsic =
-    generic::UncheckedMortalCompactExtrinsic<Address, Nonce, Call, AccountSignature>;
-/// Executive: handles dispatch to the various modules.
-type Executive = srml_executive::Executive<Runtime, Block, Context, Balances, Runtime, AllModules>;
 
 // Implement our runtime API endpoints. This is just a bunch of proxying.
 impl_runtime_apis! {
@@ -278,11 +263,12 @@ impl_runtime_apis! {
         }
     }
 
-    impl substrate_consensus_aura_primitives::AuraApi<Block, AuraId> for Runtime {
+    impl substrate_consensus_aura_primitives::AuraApi<Block, ed25519::Public> for Runtime {
         fn slot_duration() -> u64 {
             Aura::slot_duration()
         }
-        fn authorities() -> Vec<AuraId> {
+
+        fn authorities() -> Vec<ed25519::Public> {
             Aura::authorities()
         }
     }
