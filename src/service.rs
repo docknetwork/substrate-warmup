@@ -8,7 +8,7 @@ use substrate_basic_authorship::ProposerFactory;
 use substrate_client::{self as client, LongestChain};
 use substrate_consensus_aura::{import_queue, start_aura, AuraImportQueue, SlotDuration};
 use substrate_inherents::InherentDataProviders;
-use substrate_network::{config::DummyFinalityProofRequestBuilder, construct_simple_protocol};
+use substrate_network::config::DummyFinalityProofRequestBuilder;
 use substrate_primitives::{ed25519::Pair, Pair as PairT};
 use substrate_service::construct_service_factory;
 use substrate_service::{
@@ -51,9 +51,55 @@ pub struct NodeConfig {
     inherent_data_providers: InherentDataProviders,
 }
 
-construct_simple_protocol! {
-    /// Demo protocol attachment for substrate.
-    pub struct NodeProtocol where Block = Block { }
+pub struct NodeProtocol;
+
+impl NodeProtocol {
+    pub fn new() -> Self {
+        NodeProtocol
+    }
+}
+
+impl substrate_network::specialization::NetworkSpecialization<Block> for NodeProtocol {
+    fn status(&self) -> Vec<u8> {
+        Vec::new()
+    }
+
+    fn on_connect(
+        &mut self,
+        _ctx: &mut substrate_network::Context<Block>,
+        _who: substrate_network::PeerId,
+        _status: substrate_network::StatusMessage<Block>,
+    ) {
+    }
+
+    fn on_disconnect(
+        &mut self,
+        _ctx: &mut substrate_network::Context<Block>,
+        _who: substrate_network::PeerId,
+    ) {
+    }
+
+    fn on_message(
+        &mut self,
+        _ctx: &mut substrate_network::Context<Block>,
+        _who: substrate_network::PeerId,
+        _message: Vec<u8>,
+    ) {
+    }
+
+    fn on_event(&mut self, _event: substrate_network::specialization::Event) {}
+
+    fn on_abort(&mut self) {}
+
+    fn maintain_peers(&mut self, _ctx: &mut substrate_network::Context<Block>) {}
+
+    fn on_block_imported(
+        &mut self,
+        _ctx: &mut substrate_network::Context<Block>,
+        _hash: <Block as substrate_network::BlockT>::Hash,
+        _header: &<Block as substrate_network::BlockT>::Header,
+    ) {
+    }
 }
 
 construct_service_factory! {
