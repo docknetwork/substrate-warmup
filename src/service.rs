@@ -7,7 +7,6 @@ use std::sync::Arc;
 use substrate_basic_authorship::ProposerFactory;
 use substrate_client::{self as client, LongestChain};
 use substrate_consensus_aura::{import_queue, start_aura, AuraImportQueue, SlotDuration};
-use substrate_executor::native_executor_instance;
 use substrate_inherents::InherentDataProviders;
 use substrate_network::{config::DummyFinalityProofRequestBuilder, construct_simple_protocol};
 use substrate_primitives::{ed25519::Pair, Pair as PairT};
@@ -18,15 +17,34 @@ use substrate_service::{
 };
 use substrate_transaction_pool::{self, txpool::Pool as TransactionPool};
 
-pub use substrate_executor::NativeExecutor;
+pub use substrate_executor::{
+    with_native_environment, Blake2Hasher, Externalities, NativeExecutor, NativeVersion,
+};
 
-// Our native executor instance.
-native_executor_instance!(
-	pub Executor,
-	runtime::api::dispatch,
-    runtime::native_version,
-	WASM_BINARY
-);
+pub struct Executor;
+
+impl substrate_executor::NativeExecutionDispatch for Executor {
+    fn native_equivalent() -> &'static [u8] {
+        WASM_BINARY
+    }
+
+    fn dispatch(
+        ext: &mut Externalities<Blake2Hasher>,
+        method: &str,
+        data: &[u8],
+    ) -> substrate_executor::error::Result<Vec<u8>> {
+        with_native_environment(ext, || runtime::api::dispatch(method, data))?
+            .ok_or_else(|| substrate_executor::error::Error::MethodNotFound(method.to_owned()))
+    }
+
+    fn native_version() -> NativeVersion {
+        runtime::native_version()
+    }
+
+    fn new(default_heap_pages: Option<u64>) -> NativeExecutor<Self> {
+        NativeExecutor::new(default_heap_pages)
+    }
+}
 
 #[derive(Default)]
 pub struct NodeConfig {
