@@ -1,10 +1,12 @@
 //! The Substrate Node Template runtime. This can be compiled with `#[no_std]`, ready for Wasm.
 
+// ideally this module would alway be no_std, but macros like construct_runtime make that difficult
 #![cfg_attr(not(feature = "std"), no_std)]
-// `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
+
+// `construct_runtime!` requires a large stack
 #![recursion_limit = "256"]
 
-// Make the WASM binary available.
+// exposes pub WASM_BINARY and pub WASM_BINARY_BLOATY
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
@@ -21,7 +23,6 @@ use substrate_client::{
 };
 use substrate_primitives::{ed25519, OpaqueMetadata, H256};
 
-/// Used for the module template in `./template.rs`
 mod template;
 
 type Block = generic::Block<<Runtime as srml_system::Trait>::Header, UncheckedExtrinsic>;
@@ -54,21 +55,17 @@ pub mod opaque {
         }
     }
 
-    /// Opaque block header type.
     type Header = generic::Header<<Runtime as srml_system::Trait>::BlockNumber, BlakeTwo256>;
-
-    /// Opaque block type.
     pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 }
 
-/// This runtime version.
 pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("node-template"),
     impl_name: create_runtime_str!("node-template"),
     authoring_version: 3,
     spec_version: 4,
     impl_version: 4,
-    apis: RUNTIME_API_VERSIONS, // it's not clear where RUNTIME_API_VERSIONS is defined
+    apis: RUNTIME_API_VERSIONS,
 };
 
 parameter_types! {
@@ -76,27 +73,16 @@ parameter_types! {
 }
 
 impl srml_system::Trait for Runtime {
-    /// The identifier used to distinguish between accounts.
     type AccountId = ed25519::Public;
-    /// The lookup mechanism to get account ID from whatever is passed in dispatchers.
     type Lookup = Indices;
-    /// The index type for storing how many extrinsics an account has signed.
     type Index = u64;
-    /// The index type for blocks.
     type BlockNumber = u64;
-    /// The type for hashing blocks and tries.
     type Hash = H256;
-    /// The hashing algorithm used.
     type Hashing = BlakeTwo256;
-    /// The header type.
     type Header = generic::Header<Self::BlockNumber, BlakeTwo256>;
-    /// The ubiquitous event type.
     type Event = Event;
-    /// Update weight (to fee) multiplier per-block.
     type WeightMultiplierUpdate = ();
-    /// The ubiquitous origin type.
-    type Origin = Origin; // it's unclear where Origin is defined
-    /// Maximum number of block number to block hash mappings to keep (oldest pruned first).
+    type Origin = Origin;
     type BlockHashCount = ChainStateCacheSize;
 }
 
@@ -106,22 +92,17 @@ impl srml_aura::Trait for Runtime {
 }
 
 impl srml_indices::Trait for Runtime {
-    /// The type for recording indexing into the account enumeration. If this ever overflows, there
-    /// will be problems!
     type AccountIndex = u32;
-    /// Use the standard means of resolving an index hint from an id.
     type ResolveHint = srml_indices::SimpleResolveHint<Self::AccountId, Self::AccountIndex>;
-    /// Determine whether an account is dead.
     type IsDeadAccount = Balances;
-    /// The ubiquitous event type.
     type Event = Event;
 }
 
 parameter_types! {
     pub const MinimumPeriod: u64 = 5;
 }
+
 impl srml_timestamp::Trait for Runtime {
-    /// A timestamp: seconds since the unix epoch.
     type Moment = u64;
     type OnTimestampSet = Aura;
     type MinimumPeriod = MinimumPeriod;
@@ -136,15 +117,10 @@ parameter_types! {
 }
 
 impl srml_balances::Trait for Runtime {
-    /// The type for recording an account's balance.
     type Balance = u128;
-    /// What to do if an account's free balance gets zeroed.
     type OnFreeBalanceZero = ();
-    /// What to do if a new account is created.
     type OnNewAccount = Indices;
-    /// The ubiquitous event type.
     type Event = Event;
-
     type TransactionPayment = ();
     type DustRemoval = ();
     type TransferPayment = ();
@@ -156,19 +132,16 @@ impl srml_balances::Trait for Runtime {
 }
 
 impl srml_sudo::Trait for Runtime {
-    /// The ubiquitous event type.
     type Event = Event;
     type Proposal = Call;
 }
 
-/// Used for the module template in `./template.rs`
 impl template::Trait for Runtime {
     type Event = Event;
 }
 
-/// Unchecked extrinsic type as expected by this runtime.
 type UncheckedExtrinsic = generic::UncheckedMortalCompactExtrinsic<
-    <Indices as StaticLookup>::Source, // it's not clear where Indices is defined
+    <Indices as StaticLookup>::Source,
     <Runtime as srml_system::Trait>::Index,
     Call,
     ed25519::Signature,
@@ -201,7 +174,7 @@ construct_runtime!(
 	}
 );
 
-// Implement our runtime API endpoints. This is just a bunch of proxying.
+// just a bunch of proxying
 impl_runtime_apis! {
     impl runtime_api::Core<Block> for Runtime {
         fn version() -> RuntimeVersion {
