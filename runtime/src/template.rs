@@ -94,9 +94,11 @@ mod tests {
     // configuration traits of modules we want to use.
     #[derive(Clone, Eq, PartialEq)]
     pub struct Test;
+    
     parameter_types! {
         pub const BlockHashCount: u64 = 250;
     }
+    
     impl srml_system::Trait for Test {
         type Origin = Origin;
         type Index = u64;
@@ -110,9 +112,11 @@ mod tests {
         type Event = ();
         type BlockHashCount = BlockHashCount;
     }
+    
     impl Trait for Test {
         type Event = ();
     }
+    
     type TemplateModule = Module<Test>;
 
     // This function basically just builds a genesis storage key/value store according to

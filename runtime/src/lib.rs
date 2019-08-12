@@ -9,22 +9,16 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use parity_codec::{Decode, Encode};
-#[cfg(feature = "std")]
-use serde::{Deserialize, Serialize};
 use sr_primitives::traits::{self, BlakeTwo256, Block as BlockT, NumberFor, StaticLookup};
 use sr_primitives::transaction_validity::TransactionValidity;
 use sr_primitives::{create_runtime_str, generic, ApplyResult};
 use sr_std::prelude::*;
-#[cfg(feature = "std")]
-use sr_version::NativeVersion;
 use sr_version::RuntimeVersion;
 use srml_support::{construct_runtime, parameter_types};
 use substrate_client::{
     block_builder::api::{self as block_builder_api, CheckInherentsResult, InherentData},
     impl_runtime_apis, runtime_api,
 };
-#[cfg(feature = "std")]
-use substrate_primitives::bytes;
 use substrate_primitives::{ed25519, OpaqueMetadata, H256};
 
 /// Used for the module template in `./template.rs`
@@ -38,34 +32,37 @@ type Block = generic::Block<<Runtime as srml_system::Trait>::Header, UncheckedEx
 /// to even the core datastructures.
 pub mod opaque {
     use super::*;
+    use core::fmt;
+    use serde::{Deserialize, Serialize};
 
     /// Opaque, encoded, unchecked extrinsic.
-    #[derive(PartialEq, Eq, Clone, Default, Encode, Decode)]
-    #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-    pub struct UncheckedExtrinsic(#[cfg_attr(feature = "std", serde(with = "bytes"))] pub Vec<u8>);
-    #[cfg(feature = "std")]
-    impl std::fmt::Debug for UncheckedExtrinsic {
-        fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-            write!(
-                fmt,
-                "{}",
-                substrate_primitives::hexdisplay::HexDisplay::from(&self.0)
-            )
+    #[derive(PartialEq, Eq, Clone, Default, Encode, Decode, Serialize, Deserialize)]
+    pub struct UncheckedExtrinsic(Vec<u8>);
+
+    impl fmt::Debug for UncheckedExtrinsic {
+        fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+            for byte in &self.0 {
+                write!(fmt, "{:02x}", byte)?;
+            }
+            Ok(())
         }
     }
+
     impl traits::Extrinsic for UncheckedExtrinsic {
         fn is_signed(&self) -> Option<bool> {
             None
         }
     }
+
     /// Opaque block header type.
     type Header = generic::Header<<Runtime as srml_system::Trait>::BlockNumber, BlakeTwo256>;
+
     /// Opaque block type.
     pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 }
 
 /// This runtime version.
-const VERSION: RuntimeVersion = RuntimeVersion {
+pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("node-template"),
     impl_name: create_runtime_str!("node-template"),
     authoring_version: 3,
@@ -73,15 +70,6 @@ const VERSION: RuntimeVersion = RuntimeVersion {
     impl_version: 4,
     apis: RUNTIME_API_VERSIONS, // it's not clear where RUNTIME_API_VERSIONS is defined
 };
-
-/// The version infromation used to identify this runtime when compiled natively.
-#[cfg(feature = "std")]
-pub fn native_version() -> NativeVersion {
-    NativeVersion {
-        runtime_version: VERSION,
-        can_author_with: Default::default(),
-    }
-}
 
 parameter_types! {
     pub const ChainStateCacheSize: <Runtime as srml_system::Trait>::BlockNumber = 250;

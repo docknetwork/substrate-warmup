@@ -37,7 +37,10 @@ impl substrate_executor::NativeExecutionDispatch for Executor {
     }
 
     fn native_version() -> NativeVersion {
-        runtime::native_version()
+        NativeVersion {
+            runtime_version: runtime::VERSION,
+            can_author_with: Default::default(),
+        }
     }
 
     fn new(default_heap_pages: Option<u64>) -> NativeExecutor<Self> {

@@ -5,7 +5,7 @@ authors = ["Anonymous"]
 edition = "2018"
 
 [dependencies]
-serde = { version = "1.0", optional = true, features = ["derive"] }
+serde = { version = "1.0", features = ["derive"], default-features = false }
 safe-mix = { version = "1.0", default-features = false }
 parity-codec = { version = "4.1.1", default-features = false, features = ["derive"] }
 
@@ -58,6 +58,7 @@ rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
 rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+features = ["no_oom", "no_panic_handler"]
 
 [dependencies.sr-primitives]
 default_features = false
@@ -110,7 +111,6 @@ std = [
 	"srml-timestamp/std",
 	"srml-sudo/std",
 	"sr-version/std",
-	"serde",
 	"safe-mix/std",
 	"substrate-consensus-aura-primitives/std",
 	"substrate-offchain-primitives/std",
