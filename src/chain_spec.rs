@@ -3,9 +3,7 @@
 //! "A configuration of a chain. Can be used to build a genesis block."
 
 use core::iter::once;
-use runtime::{
-    AuraConfig, BalancesConfig, GenesisConfig, IndicesConfig, SudoConfig, SystemConfig, WASM_BINARY,
-};
+use runtime::{AuraConfig, GenesisConfig, IndicesConfig, SystemConfig, WASM_BINARY};
 use substrate_primitives::crypto::{DeriveJunction, DEV_PHRASE};
 use substrate_primitives::{ed25519, Pair};
 use substrate_service::ChainSpec;
@@ -15,13 +13,7 @@ pub fn dev() -> ChainSpec<GenesisConfig> {
     ChainSpec::from_genesis(
         "Development",
         "dev",
-        || {
-            testnet_genesis(
-                vec![dev_pk("Alice")],
-                vec![dev_pk("Alice")],
-                dev_pk("Alice"),
-            )
-        },
+        || testnet_genesis(vec![dev_pk("Alice")], vec![dev_pk("Alice")]),
         vec![],
         None,
         None,
@@ -46,7 +38,6 @@ pub fn local() -> ChainSpec<GenesisConfig> {
                     dev_pk("Eve"),
                     dev_pk("Ferdie"),
                 ],
-                dev_pk("Alice"),
             )
         },
         vec![],
@@ -60,7 +51,6 @@ pub fn local() -> ChainSpec<GenesisConfig> {
 fn testnet_genesis(
     initial_authorities: Vec<ed25519::Public>,
     endowed_accounts: Vec<ed25519::Public>,
-    root_key: ed25519::Public,
 ) -> GenesisConfig {
     GenesisConfig {
         system: Some(SystemConfig {
@@ -73,15 +63,6 @@ fn testnet_genesis(
         srml_indices: Some(IndicesConfig {
             ids: endowed_accounts.clone(),
         }),
-        srml_balances: Some(BalancesConfig {
-            balances: endowed_accounts
-                .iter()
-                .cloned()
-                .map(|k| (k, 1 << 60))
-                .collect(),
-            vesting: vec![],
-        }),
-        srml_sudo: Some(SudoConfig { key: root_key }),
     }
 }
 

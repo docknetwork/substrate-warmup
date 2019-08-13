@@ -2,7 +2,6 @@
 
 // ideally this module would alway be no_std, but macros like construct_runtime make that difficult
 #![cfg_attr(not(feature = "std"), no_std)]
-
 // `construct_runtime!` requires a large stack
 #![recursion_limit = "256"]
 
@@ -22,8 +21,6 @@ use substrate_client::{
     impl_runtime_apis, runtime_api,
 };
 use substrate_primitives::{ed25519, OpaqueMetadata, H256};
-
-mod template;
 
 type Block = generic::Block<<Runtime as srml_system::Trait>::Header, UncheckedExtrinsic>;
 
@@ -94,7 +91,7 @@ impl srml_aura::Trait for Runtime {
 impl srml_indices::Trait for Runtime {
     type AccountIndex = u32;
     type ResolveHint = srml_indices::SimpleResolveHint<Self::AccountId, Self::AccountIndex>;
-    type IsDeadAccount = Balances;
+    type IsDeadAccount = ();
     type Event = Event;
 }
 
@@ -106,38 +103,6 @@ impl srml_timestamp::Trait for Runtime {
     type Moment = u64;
     type OnTimestampSet = Aura;
     type MinimumPeriod = MinimumPeriod;
-}
-
-parameter_types! {
-    pub const ExistentialDeposit: u128 = 500;
-    pub const TransferFee: u128 = 0;
-    pub const CreationFee: u128 = 0;
-    pub const TransactionBaseFee: u128 = 1;
-    pub const TransactionByteFee: u128 = 0;
-}
-
-impl srml_balances::Trait for Runtime {
-    type Balance = u128;
-    type OnFreeBalanceZero = ();
-    type OnNewAccount = Indices;
-    type Event = Event;
-    type TransactionPayment = ();
-    type DustRemoval = ();
-    type TransferPayment = ();
-    type ExistentialDeposit = ExistentialDeposit;
-    type TransferFee = TransferFee;
-    type CreationFee = CreationFee;
-    type TransactionBaseFee = TransactionBaseFee;
-    type TransactionByteFee = TransactionByteFee;
-}
-
-impl srml_sudo::Trait for Runtime {
-    type Event = Event;
-    type Proposal = Call;
-}
-
-impl template::Trait for Runtime {
-    type Event = Event;
 }
 
 type UncheckedExtrinsic = generic::UncheckedMortalCompactExtrinsic<
@@ -152,7 +117,7 @@ type Executive = srml_executive::Executive<
     Runtime,
     Block,
     srml_system::ChainContext<Runtime>,
-    Balances,
+    (),
     Runtime,
     AllModules,
 >;
@@ -168,9 +133,6 @@ construct_runtime!(
 		Timestamp: srml_timestamp::{Module, Call, Storage, Inherent},
 		Aura: srml_aura::{Module, Config<T>, Inherent(Timestamp)},
 		Indices: srml_indices::{default, Config<T>},
-		Balances: srml_balances,
-		Sudo: srml_sudo,
-		TemplateModule: template::{Module, Call, Storage, Event<T>},
 	}
 );
 
