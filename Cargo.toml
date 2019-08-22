@@ -67,5 +67,9 @@ rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
 git = 'https://github.com/paritytech/substrate.git'
 rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
 
+[dependencies.srml-balances]
+git = 'https://github.com/paritytech/substrate.git'
+rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+
 [build-dependencies]
 vergen = "3"

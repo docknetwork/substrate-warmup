@@ -28,7 +28,7 @@ impl substrate_executor::NativeExecutionDispatch for Executor {
     }
 
     fn dispatch(
-        ext: &mut Externalities<Blake2Hasher>,
+        ext: &mut dyn Externalities<Blake2Hasher>,
         method: &str,
         data: &[u8],
     ) -> substrate_executor::error::Result<Vec<u8>> {
@@ -68,7 +68,7 @@ impl substrate_network::specialization::NetworkSpecialization<Block> for NodePro
 
     fn on_connect(
         &mut self,
-        _ctx: &mut substrate_network::Context<Block>,
+        _ctx: &mut dyn substrate_network::Context<Block>,
         _who: substrate_network::PeerId,
         _status: substrate_network::StatusMessage<Block>,
     ) {
@@ -76,14 +76,14 @@ impl substrate_network::specialization::NetworkSpecialization<Block> for NodePro
 
     fn on_disconnect(
         &mut self,
-        _ctx: &mut substrate_network::Context<Block>,
+        _ctx: &mut dyn substrate_network::Context<Block>,
         _who: substrate_network::PeerId,
     ) {
     }
 
     fn on_message(
         &mut self,
-        _ctx: &mut substrate_network::Context<Block>,
+        _ctx: &mut dyn substrate_network::Context<Block>,
         _who: substrate_network::PeerId,
         _message: Vec<u8>,
     ) {
@@ -93,11 +93,11 @@ impl substrate_network::specialization::NetworkSpecialization<Block> for NodePro
 
     fn on_abort(&mut self) {}
 
-    fn maintain_peers(&mut self, _ctx: &mut substrate_network::Context<Block>) {}
+    fn maintain_peers(&mut self, _ctx: &mut dyn substrate_network::Context<Block>) {}
 
     fn on_block_imported(
         &mut self,
-        _ctx: &mut substrate_network::Context<Block>,
+        _ctx: &mut dyn substrate_network::Context<Block>,
         _hash: <Block as substrate_network::BlockT>::Hash,
         _header: &<Block as substrate_network::BlockT>::Header,
     ) {
@@ -211,7 +211,7 @@ impl substrate_service::ServiceFactory for Factory {
     fn build_finality_proof_provider(
         _client: Arc<substrate_service::FullClient<Self>>,
     ) -> Result<
-        Option<Arc<substrate_service::FinalityProofProvider<Self::Block>>>,
+        Option<Arc<dyn substrate_service::FinalityProofProvider<Self::Block>>>,
         substrate_service::Error,
     > {
         Ok(None)

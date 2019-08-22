@@ -122,6 +122,51 @@ type Executive = srml_executive::Executive<
     AllModules,
 >;
 
+parameter_types! {
+    pub const PdockExistentialDeposit: u128 = 1;
+    pub const PdockTransferFee: u128 = 1;
+    pub const PdockCreationFee: u128 = 1;
+    pub const PdockTransactionBaseFee: u128 = 1;
+    pub const PdockTransactionByteFee: u128 = 1;
+    pub const PstableExistentialDeposit: u128 = 1;
+    pub const PstableTransferFee: u128 = 1;
+    pub const PstableCreationFee: u128 = 1;
+    pub const PstableTransactionBaseFee: u128 = 1;
+    pub const PstableTransactionByteFee: u128 = 1;
+}
+
+/// Configure PDOCK token
+impl srml_balances::Trait<srml_balances::Instance0> for Runtime {
+    type Balance = u128;
+    type OnFreeBalanceZero = ();
+    type OnNewAccount = ();
+    type Event = Event;
+    type TransactionPayment = ();
+    type DustRemoval = ();
+    type TransferPayment = ();
+    type ExistentialDeposit = PdockExistentialDeposit;
+    type TransferFee = PdockTransferFee;
+    type CreationFee = PdockCreationFee;
+    type TransactionBaseFee = PdockTransactionBaseFee;
+    type TransactionByteFee = PdockTransactionByteFee;
+}
+
+/// Configure PSTABLE token
+impl srml_balances::Trait<srml_balances::Instance1> for Runtime {
+    type Balance = u128;
+    type OnFreeBalanceZero = ();
+    type OnNewAccount = ();
+    type Event = Event;
+    type TransactionPayment = ();
+    type DustRemoval = ();
+    type TransferPayment = ();
+    type ExistentialDeposit = PstableExistentialDeposit;
+    type TransferFee = PstableTransferFee;
+    type CreationFee = PstableCreationFee;
+    type TransactionBaseFee = PstableTransactionBaseFee;
+    type TransactionByteFee = PstableTransactionByteFee;
+}
+
 use srml_system as system; // https://github.com/paritytech/substrate/issues/3295
 construct_runtime!(
 	pub enum Runtime where
@@ -132,7 +177,9 @@ construct_runtime!(
 		System: system::{Module, Call, Storage, Config, Event},
 		Timestamp: srml_timestamp::{Module, Call, Storage, Inherent},
 		Aura: srml_aura::{Module, Config<T>, Inherent(Timestamp)},
-		Indices: srml_indices::{default, Config<T>},
+		Indices: srml_indices::{Module, Call, Storage, Event<T>, Config<T>},
+        Pdock: srml_balances::<Instance0>::{Module, Call, Storage, Event<T>, Config<T>},
+        Pstable: srml_balances::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
 	}
 );
 

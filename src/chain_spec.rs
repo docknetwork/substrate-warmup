@@ -63,6 +63,16 @@ fn testnet_genesis(
         srml_indices: Some(IndicesConfig {
             ids: endowed_accounts.clone(),
         }),
+        // PDOCK initial allocations
+        srml_balances_Instance0: Some(srml_balances::GenesisConfig {
+            balances: Vec::new(),
+            vesting: Vec::new(),
+        }),
+        // PSTABLE initial allocations
+        srml_balances_Instance1: Some(srml_balances::GenesisConfig {
+            balances: Vec::new(),
+            vesting: Vec::new(),
+        }),
     }
 }
 

@@ -1948,6 +1948,7 @@ dependencies = [
  "parking_lot 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "runtime 2.0.0",
  "sr-io 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=afa583011eed3e8d49ee823257a3b448a24e213b)",
+ "srml-balances 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=afa583011eed3e8d49ee823257a3b448a24e213b)",
  "substrate-basic-authorship 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=afa583011eed3e8d49ee823257a3b448a24e213b)",
  "substrate-cli 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=afa583011eed3e8d49ee823257a3b448a24e213b)",
  "substrate-client 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=afa583011eed3e8d49ee823257a3b448a24e213b)",
