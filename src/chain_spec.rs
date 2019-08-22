@@ -8,12 +8,17 @@ use substrate_primitives::crypto::{DeriveJunction, DEV_PHRASE};
 use substrate_primitives::{ed25519, Pair};
 use substrate_service::ChainSpec;
 
+const AURA_PK: ed25519::Public = ed25519::Public([
+    0x03, 0xba, 0x7b, 0x33, 0x55, 0xcc, 0x1b, 0x4e, 0x48, 0x4b, 0x7d, 0xe0, 0x67, 0xda, 0x32, 0xe1,
+    0x73, 0xb9, 0x03, 0xb8, 0x81, 0x33, 0x4f, 0x55, 0xcf, 0x2c, 0x3b, 0x7b, 0x63, 0xc4, 0x73, 0xd3,
+]);
+
 /// Generate as chain spec representing the dev chain.
 pub fn dev() -> ChainSpec<GenesisConfig> {
     ChainSpec::from_genesis(
         "Development",
         "dev",
-        || testnet_genesis(vec![dev_pk("Alice")], vec![dev_pk("Alice")]),
+        || testnet_genesis(vec![AURA_PK], Vec::new()),
         vec![],
         None,
         None,
