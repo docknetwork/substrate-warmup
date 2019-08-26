@@ -9,51 +9,31 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use parity_codec::{Decode, Encode};
-use sr_primitives::traits::{self, BlakeTwo256, Block as BlockT, NumberFor, StaticLookup};
+use sr_primitives::traits::{BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, StaticLookup};
 use sr_primitives::transaction_validity::TransactionValidity;
+use sr_primitives::Perbill;
 use sr_primitives::{create_runtime_str, generic, ApplyResult};
-use sr_std::prelude::*;
 use sr_version::RuntimeVersion;
 use srml_support::{construct_runtime, parameter_types};
+use substrate_application_crypto::ed25519::AppPublic;
 use substrate_client::{
     block_builder::api::{self as block_builder_api, CheckInherentsResult, InherentData},
     impl_runtime_apis, runtime_api,
 };
 use substrate_primitives::{ed25519, OpaqueMetadata, H256};
 
-type Block = generic::Block<<Runtime as srml_system::Trait>::Header, UncheckedExtrinsic>;
-
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
 /// of data like extrinsics, allowing for them to continue syncing the network through upgrades
 /// to even the core datastructures.
 pub mod opaque {
-    use super::*;
-    use core::fmt;
-    use serde::{Deserialize, Serialize};
-
-    /// Opaque, encoded, unchecked extrinsic.
-    #[derive(PartialEq, Eq, Clone, Default, Encode, Decode, Serialize, Deserialize)]
-    pub struct UncheckedExtrinsic(Vec<u8>);
-
-    impl fmt::Debug for UncheckedExtrinsic {
-        fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-            for byte in &self.0 {
-                write!(fmt, "{:02x}", byte)?;
-            }
-            Ok(())
-        }
-    }
-
-    impl traits::Extrinsic for UncheckedExtrinsic {
-        fn is_signed(&self) -> Option<bool> {
-            None
-        }
-    }
-
-    type Header = generic::Header<<Runtime as srml_system::Trait>::BlockNumber, BlakeTwo256>;
-    pub type Block = generic::Block<Header, UncheckedExtrinsic>;
+    use super::Runtime;
+    use sr_primitives::generic;
+    pub type Header = generic::Header<
+        <Runtime as srml_system::Trait>::BlockNumber,
+        <Runtime as srml_system::Trait>::Hashing,
+    >;
+    pub type Block = generic::Block<Header, sr_primitives::OpaqueExtrinsic>;
 }
 
 pub const VERSION: RuntimeVersion = RuntimeVersion {
@@ -67,25 +47,36 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 
 parameter_types! {
     pub const ChainStateCacheSize: <Runtime as srml_system::Trait>::BlockNumber = 250;
+    pub const MaximumBlockWeight: u32 = 1_000_000;
+    pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
+    pub const MaximumBlockLength: u32 = 5 * 1024 * 1024;
+    pub const Version: RuntimeVersion = VERSION;
 }
 
 impl srml_system::Trait for Runtime {
     type AccountId = ed25519::Public;
+    /// The aggregated dispatch type that is available for extrinsics.
+    type Call = Call;
     type Lookup = Indices;
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
     type Hashing = BlakeTwo256;
-    type Header = generic::Header<Self::BlockNumber, BlakeTwo256>;
+    type Header = generic::Header<Self::BlockNumber, Self::Hashing>;
     type Event = Event;
     type WeightMultiplierUpdate = ();
     type Origin = Origin;
     type BlockHashCount = ChainStateCacheSize;
+    /// Maximum weight of each block. With a default weight system of 1byte == 1weight, 4mb is ok.
+    type MaximumBlockWeight = MaximumBlockWeight;
+    /// Maximum size of all encoded transactions (in bytes) that are allowed in one block.
+    type MaximumBlockLength = MaximumBlockLength;
+    type AvailableBlockRatio = AvailableBlockRatio;
+    type Version = Version;
 }
 
 impl srml_aura::Trait for Runtime {
-    type HandleReport = ();
-    type AuthorityId = ed25519::Public;
+    type AuthorityId = AppPublic;
 }
 
 impl srml_indices::Trait for Runtime {
@@ -95,32 +86,33 @@ impl srml_indices::Trait for Runtime {
     type Event = Event;
 }
 
-parameter_types! {
-    pub const MinimumPeriod: u64 = 5;
-}
-
 impl srml_timestamp::Trait for Runtime {
     type Moment = u64;
     type OnTimestampSet = Aura;
     type MinimumPeriod = MinimumPeriod;
 }
 
-type UncheckedExtrinsic = generic::UncheckedMortalCompactExtrinsic<
-    <Indices as StaticLookup>::Source,
-    <Runtime as srml_system::Trait>::Index,
-    Call,
-    ed25519::Signature,
->;
+parameter_types! {
+    pub const MinimumPeriod: u64 = 5;
+}
 
-/// Executive: handles dispatch to the various modules.
-type Executive = srml_executive::Executive<
-    Runtime,
-    Block,
-    srml_system::ChainContext<Runtime>,
-    (),
-    Runtime,
-    AllModules,
->;
+pub type Address = <Indices as StaticLookup>::Source;
+pub type Header = <Runtime as system::Trait>::Header;
+pub type Block = generic::Block<Header, UncheckedExtrinsic>;
+pub type SignedBlock = generic::SignedBlock<Block>;
+pub type BlockId = generic::BlockId<Block>;
+pub type SignedExtra = (
+    srml_system::CheckVersion<Runtime>,
+    srml_system::CheckGenesis<Runtime>,
+    srml_system::CheckEra<Runtime>,
+    srml_system::CheckNonce<Runtime>,
+    srml_system::CheckWeight<Runtime>,
+);
+pub type UncheckedExtrinsic =
+    generic::UncheckedExtrinsic<Address, Call, ed25519::Signature, SignedExtra>;
+pub type CheckedExtrinsic = generic::CheckedExtrinsic<ed25519::Public, Call, SignedExtra>;
+pub type Executive =
+    srml_executive::Executive<Runtime, Block, system::ChainContext<Runtime>, Runtime, AllModules>;
 
 parameter_types! {
     pub const PdockExistentialDeposit: u128 = 1;
@@ -149,6 +141,7 @@ impl srml_balances::Trait<srml_balances::Instance0> for Runtime {
     type CreationFee = PdockCreationFee;
     type TransactionBaseFee = PdockTransactionBaseFee;
     type TransactionByteFee = PdockTransactionByteFee;
+    type WeightToFee = ConvertInto;
 }
 
 /// Configure PSTABLE token
@@ -165,6 +158,7 @@ impl srml_balances::Trait<srml_balances::Instance1> for Runtime {
     type CreationFee = PstableCreationFee;
     type TransactionBaseFee = PstableTransactionBaseFee;
     type TransactionByteFee = PstableTransactionByteFee;
+    type WeightToFee = ConvertInto;
 }
 
 use srml_system as system; // https://github.com/paritytech/substrate/issues/3295
@@ -233,12 +227,12 @@ impl_runtime_apis! {
         }
     }
 
-    impl substrate_consensus_aura_primitives::AuraApi<Block, ed25519::Public> for Runtime {
+    impl substrate_consensus_aura_primitives::AuraApi<Block, AppPublic> for Runtime {
         fn slot_duration() -> u64 {
             Aura::slot_duration()
         }
 
-        fn authorities() -> Vec<ed25519::Public> {
+        fn authorities() -> Vec<AppPublic> {
             Aura::authorities()
         }
     }
