@@ -7,88 +7,93 @@ edition = "2018"
 [dependencies]
 serde = { version = "1.0", features = ["derive"], default-features = false }
 safe-mix = { version = "1.0", default-features = false }
-parity-codec = { version = "4.1.1", default-features = false, features = ["derive"] }
+parity-scale-codec = { version = "1.0.5", default-features = false, features = ["derive"] }
 
 [dependencies.srml-aura]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.srml-balances]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.substrate-client]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.substrate-consensus-aura-primitives]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.srml-executive]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.srml-indices]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
+
+[dependencies.substrate-application-crypto]
+default-features = false
+git = 'https://github.com/paritytech/substrate.git'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.substrate-offchain-primitives]
 default-features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.substrate-primitives]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.sr-std]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.sr-io]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 features = ["no_oom", "no_panic_handler"]
 
 [dependencies.sr-primitives]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.srml-sudo]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.srml-support]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.srml-system]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.srml-timestamp]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [dependencies.sr-version]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'afa583011eed3e8d49ee823257a3b448a24e213b'
+rev = 'c63ee7ad8fef5aba30930e56b82e282e2f14d1d5'
 
 [build-dependencies]
 substrate-wasm-builder-runner = "1.0.2"
@@ -96,7 +101,7 @@ substrate-wasm-builder-runner = "1.0.2"
 [features]
 default = ["std"]
 std = [
-	"parity-codec/std",
+	"parity-scale-codec/std",
 	"substrate-client/std",
 	"sr-std/std",
 	"sr-io/std",
