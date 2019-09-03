@@ -1,103 +1,151 @@
-//! Defines Substrate chain specifications used in the project.
-//! What's a ChainSpec? It's not totally clear, but substrate docs define it thusly.
-//! "A configuration of a chain. Can be used to build a genesis block."
+use babe_primitives::AuthorityId as BabeId;
+use grandpa_primitives::AuthorityId as GrandpaId;
+use node_template_runtime::{
+    AccountId, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig, IndicesConfig, SudoConfig,
+    SystemConfig, WASM_BINARY,
+};
+use primitives::{Pair, Public};
+use substrate_service;
 
-use core::iter::once;
-use runtime::{AuraConfig, GenesisConfig, IndicesConfig, SystemConfig, WASM_BINARY};
-use substrate_primitives::crypto::{DeriveJunction, DEV_PHRASE};
-use substrate_primitives::{ed25519, Pair};
-use substrate_service::ChainSpec;
+// Note this is the URL for the telemetry server
+//const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
-const AURA_PK: ed25519::Public = ed25519::Public([
-    0x03, 0xba, 0x7b, 0x33, 0x55, 0xcc, 0x1b, 0x4e, 0x48, 0x4b, 0x7d, 0xe0, 0x67, 0xda, 0x32, 0xe1,
-    0x73, 0xb9, 0x03, 0xb8, 0x81, 0x33, 0x4f, 0x55, 0xcf, 0x2c, 0x3b, 0x7b, 0x63, 0xc4, 0x73, 0xd3,
-]);
+/// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
+pub type ChainSpec = substrate_service::ChainSpec<GenesisConfig>;
 
-/// Generate as chain spec representing the dev chain.
-pub fn dev() -> ChainSpec<GenesisConfig> {
-    ChainSpec::from_genesis(
-        "Development",
-        "dev",
-        || testnet_genesis(vec![AURA_PK], Vec::new()),
-        vec![],
-        None,
-        None,
-        None,
-        None,
+/// The chain specification option. This is expected to come in from the CLI and
+/// is little more than one of a number of alternatives which can easily be converted
+/// from a string (`--chain=...`) into a `ChainSpec`.
+#[derive(Clone, Debug)]
+pub enum Alternative {
+    /// Whatever the current runtime is, with just Alice as an auth.
+    Development,
+    /// Whatever the current runtime is, with simple Alice/Bob auths.
+    LocalTestnet,
+}
+
+/// Helper function to generate a crypto pair from seed
+pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
+    TPublic::Pair::from_string(&format!("//{}", seed), None)
+        .expect("static values are valid; qed")
+        .public()
+}
+
+/// Helper function to generate stash, controller and session key from seed
+pub fn get_authority_keys_from_seed(seed: &str) -> (AccountId, AccountId, GrandpaId, BabeId) {
+    (
+        get_from_seed::<AccountId>(&format!("{}//stash", seed)),
+        get_from_seed::<AccountId>(seed),
+        get_from_seed::<GrandpaId>(seed),
+        get_from_seed::<BabeId>(seed),
     )
 }
 
-/// Generate as chain spec representing a local testnet.
-pub fn local() -> ChainSpec<GenesisConfig> {
-    ChainSpec::from_genesis(
-        "Local Testnet",
-        "local_testnet",
-        || {
-            testnet_genesis(
-                vec![dev_pk("Alice"), dev_pk("Bob")],
-                vec![
-                    dev_pk("Alice"),
-                    dev_pk("Bob"),
-                    dev_pk("Charlie"),
-                    dev_pk("Dave"),
-                    dev_pk("Eve"),
-                    dev_pk("Ferdie"),
-                ],
-            )
-        },
-        vec![],
-        None,
-        None,
-        None,
-        None,
-    )
+impl Alternative {
+    /// Get an actual chain config from one of the alternatives.
+    pub(crate) fn load(self) -> Result<ChainSpec, String> {
+        Ok(match self {
+            Alternative::Development => ChainSpec::from_genesis(
+                "Development",
+                "dev",
+                || {
+                    testnet_genesis(
+                        vec![get_authority_keys_from_seed("Alice")],
+                        get_from_seed::<AccountId>("Alice"),
+                        vec![
+                            get_from_seed::<AccountId>("Alice"),
+                            get_from_seed::<AccountId>("Bob"),
+                            get_from_seed::<AccountId>("Alice//stash"),
+                            get_from_seed::<AccountId>("Bob//stash"),
+                        ],
+                        true,
+                    )
+                },
+                vec![],
+                None,
+                None,
+                None,
+                None,
+            ),
+            Alternative::LocalTestnet => ChainSpec::from_genesis(
+                "Local Testnet",
+                "local_testnet",
+                || {
+                    testnet_genesis(
+                        vec![
+                            get_authority_keys_from_seed("Alice"),
+                            get_authority_keys_from_seed("Bob"),
+                        ],
+                        get_from_seed::<AccountId>("Alice"),
+                        vec![
+                            get_from_seed::<AccountId>("Alice"),
+                            get_from_seed::<AccountId>("Bob"),
+                            get_from_seed::<AccountId>("Charlie"),
+                            get_from_seed::<AccountId>("Dave"),
+                            get_from_seed::<AccountId>("Eve"),
+                            get_from_seed::<AccountId>("Ferdie"),
+                            get_from_seed::<AccountId>("Alice//stash"),
+                            get_from_seed::<AccountId>("Bob//stash"),
+                            get_from_seed::<AccountId>("Charlie//stash"),
+                            get_from_seed::<AccountId>("Dave//stash"),
+                            get_from_seed::<AccountId>("Eve//stash"),
+                            get_from_seed::<AccountId>("Ferdie//stash"),
+                        ],
+                        true,
+                    )
+                },
+                vec![],
+                None,
+                None,
+                None,
+                None,
+            ),
+        })
+    }
+
+    pub(crate) fn from(s: &str) -> Option<Self> {
+        match s {
+            "dev" => Some(Alternative::Development),
+            "" | "local" => Some(Alternative::LocalTestnet),
+            _ => None,
+        }
+    }
 }
 
 fn testnet_genesis(
-    initial_authorities: Vec<ed25519::Public>,
-    endowed_accounts: Vec<ed25519::Public>,
+    initial_authorities: Vec<(AccountId, AccountId, GrandpaId, BabeId)>,
+    root_key: AccountId,
+    endowed_accounts: Vec<AccountId>,
+    _enable_println: bool,
 ) -> GenesisConfig {
     GenesisConfig {
         system: Some(SystemConfig {
             code: WASM_BINARY.to_vec(),
             changes_trie_config: Default::default(),
         }),
-        srml_aura: Some(AuraConfig {
-            authorities: initial_authorities.clone(),
-        }),
-        srml_indices: Some(IndicesConfig {
+        indices: Some(IndicesConfig {
             ids: endowed_accounts.clone(),
         }),
-        // PDOCK initial allocations
-        srml_balances_Instance0: Some(srml_balances::GenesisConfig {
-            balances: Vec::new(),
-            vesting: Vec::new(),
+        balances: Some(BalancesConfig {
+            balances: endowed_accounts
+                .iter()
+                .cloned()
+                .map(|k| (k, 1 << 60))
+                .collect(),
+            vesting: vec![],
         }),
-        // PSTABLE initial allocations
-        srml_balances_Instance1: Some(srml_balances::GenesisConfig {
-            balances: Vec::new(),
-            vesting: Vec::new(),
+        sudo: Some(SudoConfig { key: root_key }),
+        babe: Some(BabeConfig {
+            authorities: initial_authorities
+                .iter()
+                .map(|x| (x.3.clone(), 1))
+                .collect(),
         }),
-    }
-}
-
-/// Derive ed25519 key using SchnorrRistrettoHDKD on a static secret
-/// (substrate_primitives::crypto::DEV_PHRASE) and a single hard junction derived from `s`.
-fn dev_pk(s: &str) -> ed25519::Public {
-    ed25519::Pair::from_standard_components(DEV_PHRASE, None, once(DeriveJunction::hard(s)))
-        .expect("err generating authority key")
-        .public()
-}
-
-#[cfg(test)]
-mod test {
-    use super::dev_pk;
-
-    #[test]
-    fn derive_dev_pk() {
-        for name in &["Alice", "/Alice", "//Alice", "1", "0"] {
-            dbg!(name);
-            dev_pk(name);
-        }
+        grandpa: Some(GrandpaConfig {
+            authorities: initial_authorities
+                .iter()
+                .map(|x| (x.2.clone(), 1))
+                .collect(),
+        }),
     }
 }
