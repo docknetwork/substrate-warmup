@@ -8,6 +8,8 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+mod erc20;
+
 use babe::AuthorityId as BabeId;
 use client::{
     block_builder::api::{self as block_builder_api, CheckInherentsResult, InherentData},
@@ -63,9 +65,6 @@ pub type Hash = primitives::H256;
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
 
-/// Used for the module template in `./template.rs`
-mod template;
-
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
 /// of data like extrinsics, allowing for them to continue syncing the network through upgrades
@@ -96,11 +95,11 @@ pub mod opaque {
 
 /// This runtime version.
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("node-template"),
-    impl_name: create_runtime_str!("node-template"),
+    spec_name: create_runtime_str!("erc20-multi"),
+    impl_name: create_runtime_str!("erc20-multi"),
     authoring_version: 3,
-    spec_version: 4,
-    impl_version: 4,
+    spec_version: 3,
+    impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
 };
 
@@ -254,9 +253,9 @@ impl sudo::Trait for Runtime {
     type Proposal = Call;
 }
 
-/// Used for the module template in `./template.rs`
-impl template::Trait for Runtime {
+impl erc20::Trait for Runtime {
     type Event = Event;
+    type TokenBalance = u128;
 }
 
 construct_runtime!(
@@ -272,8 +271,7 @@ construct_runtime!(
 		Indices: indices::{default, Config<T>},
 		Balances: balances,
 		Sudo: sudo,
-		// Used for the module template in `./template.rs`
-		TemplateModule: template::{Module, Call, Storage, Event<T>},
+        Erc20: erc20::{Module, Call, Storage, Event<T>},
 	}
 );
 
