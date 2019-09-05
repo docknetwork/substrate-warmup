@@ -1,0 +1,330 @@
+[package]
+name = "substrate"
+version = "0.1.0"
+authors = []
+edition = "2018"
+
+[dependencies.substrate-application-crypto]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.substrate-client]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.substrate-finality-grandpa-primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.substrate-inherents]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.substrate-panic-handler]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.substrate-primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.substrate-serializer]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.substrate-session]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.sr-api-macros]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.sr-io]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.sr-primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.sr-staking-primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.sr-sandbox]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.sr-std]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.sr-version]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.substrate-test-runtime]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.substrate-trie]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.substrate-wasm-builder-runner]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.srml-support]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-support-procedural]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.srml-support-procedural-tools]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.srml-support-procedural-tools-derive]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.srml-support-test]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-authorship]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-assets]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-aura]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-balances]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-collective]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-democracy]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-elections]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-example]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-executive]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-finality-tracker]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-generic-asset]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-grandpa]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-im-online]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-authority-discovery]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-indices]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-membership]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-metadata]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-offences]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-scored-pool]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-session]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-staking]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-sudo]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-system]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-timestamp]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-treasury]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.node-primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+# The following substrate workspace members are currently excluded due to build breakage
+# it's ok to add them again, but it will involve some debugging.
+
+# [dependencies.substrate-cli] breaks
+# [dependencies.substrate-client-db] breaks
+# [dependencies.substrate-consensus-aura] breaks
+# [dependencies.substrate-consensus-babe] breaks
+# [dependencies.substrate-consensus-common] breaks
+# [dependencies.substrate-consensus-rhd] breaks 317
+# [dependencies.substrate-consensus-slots] breaks
+# [dependencies.substrate-consensus-uncles] breaks
+# [dependencies.substrate-executor] breaks
+# [dependencies.substrate-runtime-test] breaks
+# [dependencies.substrate-finality-grandpa] breaks
+# [dependencies.substrate-keyring] breaks
+# [dependencies.substrate-keystore] breaks
+# [dependencies.substrate-network] breaks
+# [dependencies.substrate-rpc] breaks
+# [dependencies.substrate-rpc-servers] breaks
+# [dependencies.substrate-service] breaks
+# [dependencies.substrate-service-test] breaks 317
+# [dependencies.substrate-state-machine] breaks
+# [dependencies.substrate-telemetry] breaks
+# [dependencies.substrate-test-client] breaks
+# [dependencies.substrate-test-runtime-client] breaks
+# [dependencies.substrate-transaction-pool] breaks
+# [dependencies.substrate-transaction-graph] breaks
+# [dependencies.fork-tree] breaks
+# [dependencies.substrate-wasm-builder] breaks
+# [dependencies.srml-contracts] breaks probably related to srml-contracts "core" feature
+# [dependencies.node-cli] breaks
+# [dependencies.node-executor] breaks
+# [dependencies.node-rpc] breaks
+# [dependencies.node-rpc-client] breaks
+# [dependencies.node-runtime] breaks related to hashbrown
+# [dependencies.node-testing] breaks
+# [dependencies.node-template] breaks
+# [dependencies.subkey] breaks
+# [dependencies.chain-spec-builder] breaks
+
+[features]
+default = ["std"]
+std = [
+    "substrate-application-crypto/std",
+	"substrate-client/std",
+ 	"substrate-finality-grandpa-primitives/std",
+    "substrate-inherents/std",
+ 	"substrate-primitives/std",
+    "substrate-session/std",
+    "sr-io/std",
+    "sr-primitives/std",
+    "sr-staking-primitives/std",
+    "sr-sandbox/std",
+    "sr-std/std",
+    "sr-version/std",
+    "substrate-test-runtime/std",
+    "substrate-trie/std",
+    "srml-support/std",
+ 	"srml-support-test/std",
+    "srml-authorship/std",
+    "srml-assets/std",
+    "srml-aura/std",
+    "srml-balances/std",
+    "srml-collective/std",
+    "srml-democracy/std",
+ 	"srml-elections/std",
+    "srml-example/std",
+    "srml-executive/std",
+    "srml-finality-tracker/std",
+    "srml-generic-asset/std",
+    "srml-grandpa/std",
+    "srml-im-online/std",
+    "srml-authority-discovery/std",
+    "srml-indices/std",
+    "srml-membership/std",
+    "srml-metadata/std",
+    "srml-offences/std",
+    "srml-scored-pool/std",
+    "srml-session/std",
+    "srml-staking/std",
+    "srml-sudo/std",
+    "srml-system/std",
+    "srml-timestamp/std",
+    "srml-treasury/std",
+	"node-primitives/std",
+]
