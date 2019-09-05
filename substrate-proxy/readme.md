@@ -5,7 +5,7 @@ substrate by path to this directory.
 
 ```toml
 [dependencies]
-substrate = { path = "../../substrate-proxy", default-features = false }
+substrate = { path = "../../substrate-proxy" }
 ```
 
 This `substrate-proxy` module obviates the old de-facto method of specifying substrate dependencies.
@@ -19,4 +19,17 @@ package = "substrate-offchain-primitives"
 default-features = false
 
 # ...
+```
+
+This crate/library/workspace member has a feature "std", enabled byt default. For no_std, you'll need to disable it
+in the de-facto standard way.
+
+```toml
+[dependencies]
+substrate = { path = "../../substrate-proxy", default-features = false }
+
+[features]
+std = [
+	"substrate/std",
+]
 ```
