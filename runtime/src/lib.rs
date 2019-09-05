@@ -8,8 +8,6 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-mod erc20;
-
 use babe::AuthorityId as BabeId;
 use client::{
     block_builder::api::{self as block_builder_api, CheckInherentsResult, InherentData},

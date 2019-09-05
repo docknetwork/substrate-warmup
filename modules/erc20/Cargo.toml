@@ -1,14 +1,13 @@
 [package]
-name = "node-template-runtime"
-version = "2.0.0"
-authors = ["Anonymous"]
+name = "erc20"
+version = "0.1.0"
+authors = []
 edition = "2018"
 
 [dependencies]
 serde = { version = "1.0", optional = true, features = ["derive"] }
 safe-mix = { version = "1.0", default-features = false }
 codec = { package = "parity-scale-codec", version = "1.0.0", default-features = false, features = ["derive"] }
-erc20 = { path = "../modules/erc20", default-features = false }
 
 [dependencies.rstd]
 git = "https://github.com/paritytech/substrate.git"
@@ -143,6 +142,5 @@ std = [
 	"safe-mix/std",
 	"offchain-primitives/std",
 	"substrate-session/std",
-	"erc20/std",
 ]
 no_std = []
