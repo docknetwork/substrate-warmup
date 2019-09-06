@@ -89,3 +89,11 @@ rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
 [build-dependencies]
 vergen = "3"
+
+[workspace]
+members = [
+    "runtime",
+    "substrate-proxy",
+	"modules/erc20",
+ 	"modules/voting",
+]

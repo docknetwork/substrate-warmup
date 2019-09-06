@@ -4,6 +4,9 @@ version = "0.1.0"
 authors = []
 edition = "2018"
 
+[dependencies]
+clear_on_drop = { version = "0.2.3", features = ["no_cc"] } # wasm builds require the no_cc feature
+
 [dependencies.substrate-application-crypto]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
@@ -24,27 +27,15 @@ git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 default-features = false
 
-[dependencies.substrate-panic-handler]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
-
 [dependencies.substrate-primitives]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 default-features = false
 
-[dependencies.substrate-serializer]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
-
 [dependencies.substrate-session]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 default-features = false
-
-[dependencies.sr-api-macros]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
 [dependencies.sr-io]
 git = "https://github.com/paritytech/substrate.git"
@@ -76,36 +67,20 @@ git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 default-features = false
 
-[dependencies.substrate-test-runtime]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
-default-features = false
-
 [dependencies.substrate-trie]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 default-features = false
 
-[dependencies.substrate-wasm-builder-runner]
+[dependencies.srml-babe]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
 
 [dependencies.srml-support]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 default-features = false
-
-[dependencies.srml-support-procedural]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
-
-[dependencies.srml-support-procedural-tools]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
-
-[dependencies.srml-support-procedural-tools-derive]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
 [dependencies.srml-support-test]
 git = "https://github.com/paritytech/substrate.git"
@@ -242,13 +217,55 @@ git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 default-features = false
 
+[dependencies.substrate-consensus-babe-primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.substrate-consensus-babe]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.substrate-offchain-primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.substrate-panic-handler]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.substrate-serializer]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.sr-api-macros]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.substrate-wasm-builder-runner]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.srml-support-procedural]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.srml-support-procedural-tools]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.srml-support-procedural-tools-derive]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
 # The following substrate workspace members are currently excluded due to build breakage
 # it's ok to add them again, but it will involve some debugging.
 
 # [dependencies.substrate-cli] breaks
 # [dependencies.substrate-client-db] breaks
 # [dependencies.substrate-consensus-aura] breaks
-# [dependencies.substrate-consensus-babe] breaks
 # [dependencies.substrate-consensus-common] breaks
 # [dependencies.substrate-consensus-rhd] breaks 317
 # [dependencies.substrate-consensus-slots] breaks
@@ -281,6 +298,7 @@ default-features = false
 # [dependencies.node-template] breaks
 # [dependencies.subkey] breaks
 # [dependencies.chain-spec-builder] breaks
+# [dependencies.substrate-test-runtime] breaks
 
 [features]
 default = ["std"]
@@ -297,8 +315,8 @@ std = [
     "sr-sandbox/std",
     "sr-std/std",
     "sr-version/std",
-    "substrate-test-runtime/std",
     "substrate-trie/std",
+    "srml-babe/std",
     "srml-support/std",
  	"srml-support-test/std",
     "srml-authorship/std",
@@ -327,4 +345,6 @@ std = [
     "srml-timestamp/std",
     "srml-treasury/std",
 	"node-primitives/std",
+	"substrate-consensus-babe-primitives/std",
+    "substrate-offchain-primitives/std",
 ]
