@@ -18,32 +18,43 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-mod voting;
+#[cfg(feature = "std")]
+extern crate serde_derive;
 
-pub use voting::{
-    Event, Module, RawEvent, TallyType, Trait, VoteData, VoteRecord, VoteStage, VoteType,
-};
+#[macro_use]
+extern crate srml_support;
+
+extern crate parity_codec as codec;
+extern crate sr_io as runtime_io;
+extern crate sr_primitives as runtime_primitives;
+extern crate sr_std as rstd;
+extern crate srml_support as runtime_support;
+extern crate srml_system as system;
+extern crate substrate_primitives as primitives;
+
+pub mod voting;
+pub use voting::{Event, Module, RawEvent, Trait};
+pub use voting::{TallyType, VoteData, VoteRecord, VoteStage, VoteType};
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use parity_codec::Encode;
-    use substrate::sr_io::{self, with_externalities};
-    use substrate::sr_std::prelude::*;
-    use substrate::sr_std::result;
-    use substrate::srml_support::{
-        assert_err, assert_ok, dispatch::Result, impl_outer_event, impl_outer_origin,
-        parameter_types,
-    };
-    use substrate::srml_system::{self as system, EventRecord, Phase};
-    use substrate::substrate_primitives::{Blake2Hasher, H256};
+    use codec::Encode;
+    use primitives::{Blake2Hasher, H256};
+    use rstd::prelude::*;
+    use rstd::result;
+    use runtime_io::with_externalities;
+    use runtime_support::dispatch::Result;
+    use system::{EventRecord, Phase};
     // The testing primitives are very useful for avoiding having to work with signatures
     // or public keys. `u64` is used as the `AccountId` and no `Signature`s are requried.
-    use substrate::sr_primitives::{
+    use runtime_primitives::{
         testing::Header,
         traits::{BlakeTwo256, Hash, IdentityLookup},
         Perbill,
     };
+
+    use runtime_support::{assert_ok, impl_outer_origin};
 
     static SECRET: [u8; 32] = [
         1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

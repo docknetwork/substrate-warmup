@@ -14,13 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with Edgeware.  If not, see <http://www.gnu.org/licenses/>.
 
-use parity_codec::{Decode, Encode};
-use substrate::sr_primitives::traits::Hash;
-use substrate::sr_std::result;
-use substrate::srml_support::{
-    decl_event, decl_module, decl_storage, dispatch::Result, ensure, StorageMap, StorageValue,
-};
-use substrate::srml_system::{self as system, ensure_signed};
+#[cfg(feature = "std")]
+extern crate serde;
+
+// Needed for deriving `Serialize` and `Deserialize` for various types.
+// We only implement the serde traits for std builds - they're unneeded
+// in the wasm runtime.
+#[cfg(feature = "std")]
+extern crate parity_codec as codec;
+extern crate sr_io as runtime_io;
+extern crate sr_primitives as runtime_primitives;
+extern crate sr_std as rstd;
+extern crate srml_support as runtime_support;
+extern crate srml_system as system;
+extern crate substrate_primitives as primitives;
+
+use rstd::prelude::*;
+use rstd::result;
+use runtime_primitives::traits::Hash;
+use runtime_support::dispatch::Result;
+use runtime_support::{StorageMap, StorageValue};
+use system::ensure_signed;
+
+use codec::{Decode, Encode};
 
 /// A potential outcome of a vote, with 2^32 possible options
 pub type VoteOutcome = [u8; 32];

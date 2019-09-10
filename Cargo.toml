@@ -94,6 +94,6 @@ vergen = "3"
 members = [
     "runtime",
     "substrate-proxy",
-    "modules/erc20",
-    "modules/voting",
+	"modules/erc20",
+ 	"modules/voting",
 ]

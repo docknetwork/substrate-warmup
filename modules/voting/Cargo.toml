@@ -2,16 +2,49 @@
 name = "voting"
 version = "0.1.0"
 authors = ["Drew Stone <drew@commonwealth.im>"]
-edition = "2018"
 
 [dependencies]
 serde = { version = "1.0", default-features = false, optional = true }
 serde_derive = { version = "1.0", optional = true }
 safe-mix = { version = "1.0", default-features = false }
 parity-codec = { package = "parity-scale-codec", version = "1.0.0", default-features = false, features = ["derive"] }
-substrate = { path = "../../substrate-proxy", default-features = false }
+
+[dependencies.substrate-keyring]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+optional = true
+
+[dependencies.substrate-primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.sr-std]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.sr-io]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.sr-primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
 
 [dependencies.srml-support]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-system]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+default-features = false
+
+[dependencies.srml-balances]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 default-features = false
@@ -19,10 +52,15 @@ default-features = false
 [features]
 default = ["std"]
 std = [
-	"substrate/std",
 	"serde/std",
 	"serde_derive",
 	"safe-mix/std",
 	"parity-codec/std",
+	"substrate-primitives/std",
+	"sr-std/std",
+	"sr-io/std",
 	"srml-support/std",
+	"sr-primitives/std",
+	"srml-system/std",
+	"srml-balances/std",
 ]
