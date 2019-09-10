@@ -1,8 +1,3 @@
-use substrate::sr_primitives;
-use substrate::sr_std as rstd;
-use substrate::srml_support as support;
-use substrate::srml_system as system;
-
 use codec::{Codec, Decode, Encode};
 use rstd::prelude::*;
 use sr_primitives::traits::{CheckedAdd, CheckedSub, Member, SimpleArithmetic};
@@ -10,7 +5,7 @@ use support::{
     decl_event, decl_module, decl_storage, dispatch::Result, ensure, Parameter, StorageMap,
     StorageValue,
 };
-use system::ensure_signed;
+use system::{self, ensure_signed};
 
 // the module trait
 // contains type definitions
