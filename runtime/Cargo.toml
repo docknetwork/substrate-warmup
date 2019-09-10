@@ -9,6 +9,7 @@ serde = { version = "1.0", optional = true, features = ["derive"] }
 safe-mix = { version = "1.0", default-features = false }
 codec = { package = "parity-scale-codec", version = "1.0.0", default-features = false, features = ["derive"] }
 erc20 = { path = "../modules/erc20", default-features = false }
+voting = { path = "../modules/voting", default-features = false }
 
 [dependencies.rstd]
 git = "https://github.com/paritytech/substrate.git"
@@ -144,5 +145,6 @@ std = [
 	"offchain-primitives/std",
 	"substrate-session/std",
 	"erc20/std",
+    "voting/std",
 ]
 no_std = []

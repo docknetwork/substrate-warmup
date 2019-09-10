@@ -256,6 +256,10 @@ impl erc20::Trait for Runtime {
     type TokenBalance = u128;
 }
 
+impl voting::Trait for Runtime {
+    type Event = Event;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -270,6 +274,7 @@ construct_runtime!(
 		Balances: balances,
 		Sudo: sudo,
         Erc20: erc20::{Module, Call, Storage, Event<T>},
+        Voting: voting::{Module, Call, Storage, Event<T>},
 	}
 );
 
