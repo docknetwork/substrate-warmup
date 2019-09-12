@@ -18,14 +18,11 @@ cargo +nightly install --git https://github.com/alexcrichton/wasm-gc --force
 
 # Run
 
-You can start a development chain with:
+You can join the entnet (initial testnet) chain with:
 
 ```bash
-cargo run -- --dev
+cargo run -- --chain=entnet
 
 # or with detailed logs
-RUST_LOG=debug RUST_BACKTRACE=1 cargo run -- --dev
-
-# or get available command line options
-cargo run -- --help
+RUST_LOG=debug RUST_BACKTRACE=1 cargo run -- --chain=entnet
 ```

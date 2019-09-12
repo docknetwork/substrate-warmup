@@ -18,15 +18,13 @@ pub type ChainSpec = substrate_service::ChainSpec<GenesisConfig>;
 /// from a string (`--chain=...`) into a `ChainSpec`.
 #[derive(Clone, Debug)]
 pub enum Alternative {
-    /// Whatever the current runtime is, with just Alice as an auth.
-    Development,
-    /// Whatever the current runtime is, with simple Alice/Bob auths.
-    LocalTestnet,
+    Ent, // shared testnet with bddap as validator
+    Ved, // testnet with Alice as validator
 }
 
 /// Helper function to generate a crypto pair from seed
-pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
-    TPublic::Pair::from_string(&format!("//{}", seed), None)
+pub fn get_from_seed<P: Public>(seed: &str) -> <P::Pair as Pair>::Public {
+    P::Pair::from_string(&format!("//{}", seed), None)
         .expect("static values are valid; qed")
         .public()
 }
@@ -45,21 +43,38 @@ impl Alternative {
     /// Get an actual chain config from one of the alternatives.
     pub(crate) fn load(self) -> Result<ChainSpec, String> {
         Ok(match self {
-            Alternative::Development => ChainSpec::from_genesis(
-                "Development",
-                "dev",
+            Alternative::Ent => ChainSpec::from_genesis(
+                "Ent Testnet",
+                "ent",
                 || {
-                    testnet_genesis(
-                        vec![get_authority_keys_from_seed("Alice")],
-                        get_from_seed::<AccountId>("Alice"),
-                        vec![
-                            get_from_seed::<AccountId>("Alice"),
-                            get_from_seed::<AccountId>("Bob"),
-                            get_from_seed::<AccountId>("Alice//stash"),
-                            get_from_seed::<AccountId>("Bob//stash"),
-                        ],
-                        true,
-                    )
+                    let bddap_keys: (AccountId, AccountId, GrandpaId, BabeId) = (
+                        Public::from_slice(&[
+                            0xe6, 0x9f, 0x08, 0x8a, 0xa0, 0x18, 0xf6, 0xe9, 0xd7, 0x48, 0x2d, 0x83,
+                            0x1f, 0x5d, 0x0b, 0x04, 0xf9, 0xe7, 0xdb, 0xf6, 0xca, 0xcf, 0x75, 0xf3,
+                            0xdb, 0x5b, 0xd7, 0x5c, 0xa8, 0x58, 0xbb, 0x0a,
+                        ]),
+                        Public::from_slice(&[
+                            0xb2, 0xae, 0x55, 0x75, 0xda, 0x1f, 0xdc, 0x94, 0x82, 0x13, 0x15, 0x9e,
+                            0x76, 0xf4, 0x59, 0x4e, 0x04, 0xc8, 0xd6, 0x36, 0x02, 0x44, 0x5a, 0x00,
+                            0x0c, 0x7d, 0xe4, 0x82, 0xeb, 0xe4, 0x2d, 0x76,
+                        ]),
+                        Public::from_slice(&[
+                            0xd7, 0x24, 0x7c, 0x76, 0xce, 0x63, 0x0a, 0x91, 0xb3, 0x62, 0xe6, 0xec,
+                            0x78, 0x8e, 0xe6, 0x1c, 0xc7, 0x35, 0xb1, 0xae, 0xa7, 0xca, 0x85, 0x02,
+                            0xc8, 0x68, 0xba, 0xe7, 0xf6, 0x52, 0x00, 0x2b,
+                        ]),
+                        Public::from_slice(&[
+                            0xb2, 0xae, 0x55, 0x75, 0xda, 0x1f, 0xdc, 0x94, 0x82, 0x13, 0x15, 0x9e,
+                            0x76, 0xf4, 0x59, 0x4e, 0x04, 0xc8, 0xd6, 0x36, 0x02, 0x44, 0x5a, 0x00,
+                            0x0c, 0x7d, 0xe4, 0x82, 0xeb, 0xe4, 0x2d, 0x76,
+                        ]),
+                    );
+                    let bddap_sudo = Public::from_slice(&[
+                        0xb2, 0xae, 0x55, 0x75, 0xda, 0x1f, 0xdc, 0x94, 0x82, 0x13, 0x15, 0x9e,
+                        0x76, 0xf4, 0x59, 0x4e, 0x04, 0xc8, 0xd6, 0x36, 0x02, 0x44, 0x5a, 0x00,
+                        0x0c, 0x7d, 0xe4, 0x82, 0xeb, 0xe4, 0x2d, 0x76,
+                    ]);
+                    testnet_genesis(vec![bddap_keys], bddap_sudo, vec![])
                 },
                 vec![],
                 None,
@@ -67,31 +82,14 @@ impl Alternative {
                 None,
                 None,
             ),
-            Alternative::LocalTestnet => ChainSpec::from_genesis(
-                "Local Testnet",
-                "local_testnet",
+            Alternative::Ved => ChainSpec::from_genesis(
+                "Ved Testnet",
+                "ved",
                 || {
                     testnet_genesis(
-                        vec![
-                            get_authority_keys_from_seed("Alice"),
-                            get_authority_keys_from_seed("Bob"),
-                        ],
+                        vec![get_authority_keys_from_seed("Alice")],
                         get_from_seed::<AccountId>("Alice"),
-                        vec![
-                            get_from_seed::<AccountId>("Alice"),
-                            get_from_seed::<AccountId>("Bob"),
-                            get_from_seed::<AccountId>("Charlie"),
-                            get_from_seed::<AccountId>("Dave"),
-                            get_from_seed::<AccountId>("Eve"),
-                            get_from_seed::<AccountId>("Ferdie"),
-                            get_from_seed::<AccountId>("Alice//stash"),
-                            get_from_seed::<AccountId>("Bob//stash"),
-                            get_from_seed::<AccountId>("Charlie//stash"),
-                            get_from_seed::<AccountId>("Dave//stash"),
-                            get_from_seed::<AccountId>("Eve//stash"),
-                            get_from_seed::<AccountId>("Ferdie//stash"),
-                        ],
-                        true,
+                        vec![],
                     )
                 },
                 vec![],
@@ -105,8 +103,8 @@ impl Alternative {
 
     pub(crate) fn from(s: &str) -> Option<Self> {
         match s {
-            "dev" => Some(Alternative::Development),
-            "" | "local" => Some(Alternative::LocalTestnet),
+            "ent" => Some(Alternative::Ent),
+            "ved" => Some(Alternative::Ved),
             _ => None,
         }
     }
@@ -116,7 +114,6 @@ fn testnet_genesis(
     initial_authorities: Vec<(AccountId, AccountId, GrandpaId, BabeId)>,
     root_key: AccountId,
     endowed_accounts: Vec<AccountId>,
-    _enable_println: bool,
 ) -> GenesisConfig {
     GenesisConfig {
         system: Some(SystemConfig {
