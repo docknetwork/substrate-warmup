@@ -257,21 +257,21 @@ impl voting::Trait for Runtime {
 }
 
 construct_runtime!(
-	pub enum Runtime where
-		Block = Block,
-		NodeBlock = opaque::Block,
-		UncheckedExtrinsic = UncheckedExtrinsic
-	{
-		System: system::{Module, Call, Storage, Config, Event},
-		Timestamp: timestamp::{Module, Call, Storage, Inherent},
-		Babe: babe::{Module, Call, Storage, Config, Inherent(Timestamp)},
-		Grandpa: grandpa::{Module, Call, Storage, Config, Event},
-		Indices: indices::{default, Config<T>},
-		Balances: balances,
-		Sudo: sudo,
+    pub enum Runtime where
+        Block = Block,
+        NodeBlock = opaque::Block,
+        UncheckedExtrinsic = UncheckedExtrinsic
+    {
+        System: system::{Module, Call, Storage, Config, Event},
+        Timestamp: timestamp::{Module, Call, Storage, Inherent},
+        Babe: babe::{Module, Call, Storage, Config, Inherent(Timestamp)},
+        Grandpa: grandpa::{Module, Call, Storage, Config, Event},
+        Indices: indices::{default, Config<T>},
+        Balances: balances,
+        Sudo: sudo,
         Erc20: erc20::{Module, Call, Storage, Event<T>},
         Voting: voting::{Module, Call, Storage, Event<T>},
-	}
+    }
 );
 
 /// The address format for describing accounts.

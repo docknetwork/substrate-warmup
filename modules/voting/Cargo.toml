@@ -52,15 +52,15 @@ default-features = false
 [features]
 default = ["std"]
 std = [
-	"serde/std",
-	"serde_derive",
-	"safe-mix/std",
-	"parity-codec/std",
-	"substrate-primitives/std",
-	"sr-std/std",
-	"sr-io/std",
-	"srml-support/std",
-	"sr-primitives/std",
-	"srml-system/std",
-	"srml-balances/std",
+  "serde/std",
+  "serde_derive",
+  "safe-mix/std",
+  "parity-codec/std",
+  "substrate-primitives/std",
+  "sr-std/std",
+  "sr-io/std",
+  "srml-support/std",
+  "sr-primitives/std",
+  "srml-system/std",
+  "srml-balances/std",
 ]

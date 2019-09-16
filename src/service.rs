@@ -18,9 +18,9 @@ use transaction_pool::{self, txpool::Pool as TransactionPool};
 
 // Our native executor instance.
 native_executor_instance!(
-	pub Executor,
-	node_template_runtime::api::dispatch,
-	node_template_runtime::native_version
+    pub Executor,
+    node_template_runtime::api::dispatch,
+    node_template_runtime::native_version
 );
 
 construct_simple_protocol! {

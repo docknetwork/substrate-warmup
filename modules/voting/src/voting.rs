@@ -291,16 +291,16 @@ impl<T: Trait> Module<T> {
 }
 
 decl_event!(
-	pub enum Event<T> where <T as system::Trait>::AccountId {
-		/// new vote (id, creator, type of vote)
-		VoteCreated(u64, AccountId, VoteType),
-		/// vote stage transition (id, old stage, new stage)
-		VoteAdvanced(u64, VoteStage, VoteStage),
-		/// user commits
-		VoteCommitted(u64, AccountId),
-		/// user reveals a vote
-		VoteRevealed(u64, AccountId, Vec<VoteOutcome>),
-	}
+    pub enum Event<T> where <T as system::Trait>::AccountId {
+        /// new vote (id, creator, type of vote)
+        VoteCreated(u64, AccountId, VoteType),
+        /// vote stage transition (id, old stage, new stage)
+        VoteAdvanced(u64, VoteStage, VoteStage),
+        /// user commits
+        VoteCommitted(u64, AccountId),
+        /// user reveals a vote
+        VoteRevealed(u64, AccountId, Vec<VoteOutcome>),
+    }
 );
 
 decl_storage! {
