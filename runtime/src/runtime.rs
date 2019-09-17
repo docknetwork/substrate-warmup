@@ -20,6 +20,7 @@ use grandpa::fg_primitives::{self, ScheduledChange};
 use grandpa::{AuthorityId as GrandpaId, AuthorityWeight as GrandpaWeight};
 use primitives::{crypto::key_types, OpaqueMetadata};
 use rstd::prelude::*;
+
 use sr_primitives::traits::{
     BlakeTwo256, Block as BlockT, ConvertInto, DigestFor, NumberFor, StaticLookup, Verify,
 };
@@ -32,6 +33,8 @@ use sr_primitives::{
 use support::{construct_runtime, parameter_types};
 use version::RuntimeVersion;
 
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 #[cfg(feature = "std")]
 use version::NativeVersion;
 
@@ -255,9 +258,16 @@ impl erc20::Trait for Runtime {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Decode, Encode)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum TokenType {
     PDock,
     PStable,
+}
+
+impl Default for TokenType {
+    fn default() -> Self {
+        Self::PDock
+    }
 }
 
 impl voting::Trait for Runtime {
@@ -277,7 +287,7 @@ construct_runtime!(
         Indices: indices::{default, Config<T>},
         Balances: balances,
         Sudo: sudo,
-        Erc20: erc20::{Module, Call, Storage, Event<T>},
+        Erc20: erc20::{Module, Call, Storage, Config<T>, Event<T>},
         Voting: voting::{Module, Call, Storage, Event<T>},
     }
 );

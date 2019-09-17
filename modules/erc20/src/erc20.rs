@@ -10,7 +10,7 @@ pub trait Trait: system::Trait {
     /// Numerical type for storing balance
     type TokenBalance: Debug + SimpleArithmetic + Encode + Decode + Default + Copy;
     /// Token id
-    type Discriminant: Debug + PartialEq + Encode + Decode + Copy;
+    type Discriminant: Debug + PartialEq + Encode + Decode + Copy + Default;
 }
 
 // public interface for this runtime module
@@ -46,7 +46,13 @@ decl_module! {
 
 decl_storage! {
     trait Store for Module<T: Trait> as Erc20 {
-        BalanceOf get(balance_of): map (T::Discriminant, T::AccountId) => T::TokenBalance;
+        BalanceOf
+            get(balance_of)
+            build(|config: &GenesisConfig<T>| config.balances.clone())
+            : map (T::Discriminant, T::AccountId) => T::TokenBalance;
+    }
+    add_extra_genesis {
+        config(balances): Vec<((T::Discriminant, T::AccountId), T::TokenBalance)>;
     }
 }
 
@@ -125,6 +131,12 @@ mod test {
     pub enum TokenType {
         A,
         B,
+    }
+
+    impl Default for TokenType {
+        fn default() -> Self {
+            Self::A
+        }
     }
 
     /// test accounts
