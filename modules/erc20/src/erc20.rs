@@ -5,8 +5,6 @@ use sr_primitives::traits::{CheckedAdd, CheckedSub, SimpleArithmetic};
 use support::{decl_event, decl_module, decl_storage, dispatch::Result, StorageMap};
 use system::{self, ensure_signed};
 
-// the module trait
-// contains type definitions
 pub trait Trait: system::Trait {
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
     /// Numerical type for storing balance
@@ -30,41 +28,29 @@ decl_module! {
             value: T::TokenBalance
         ) -> Result {
             let sender = ensure_signed(origin)?;
-
-            // reduce sender's balance
-            <BalanceOf<T>>::insert(
-                (token_id, sender.clone()),
-                Self::balance_of((token_id, sender.clone()))
-                    .checked_sub(&value)
-                    .ok_or("Not enough balance.")?,
-            );
-
-            // increase receiver's balance
-            <BalanceOf<T>>::insert(
-                (token_id, to.clone()),
-                Self::balance_of((token_id, to.clone()))
-                    .checked_add(&value)
-                    .expect(
-                        "Resultant balance was greater than max value for TokenBalance. This \
-                         represents a catostrophic error.",
-                    ),
-            );
-
+            let sender_bal = Self::balance_of((token_id, sender.clone()))
+                .checked_sub(&value)
+                .ok_or("Not enough balance.")?;
+            let receiver_bal = Self::balance_of((token_id, to.clone()))
+                .checked_add(&value)
+                .ok_or("Balance overflow in receiver account.")?;
+            if sender != to {
+                <BalanceOf<T>>::insert((token_id, sender.clone()), sender_bal);
+                <BalanceOf<T>>::insert((token_id, to.clone()), receiver_bal);
+            }
             Self::deposit_event(RawEvent::Transfer(sender, to, token_id, value));
             Ok(())
         }
     }
 }
 
-// storage for this module
 decl_storage! {
     trait Store for Module<T: Trait> as Erc20 {
-        // balances mapping for an account and token
         BalanceOf get(balance_of): map (T::Discriminant, T::AccountId) => T::TokenBalance;
     }
 }
 
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[cfg_attr(rustfmt, rustfmt_skip)] // https://github.com/paritytech/substrate/issues/2114
 decl_event!(
     pub enum Event<T>
     where
@@ -73,14 +59,10 @@ decl_event!(
         TokenBalance = <T as Trait>::TokenBalance,
     {
         Transfer(
-            // from
-            AccountId,
-            // to
-            AccountId,
-            // tokenid
-            Discriminant,
-            // value
-            TokenBalance // https://github.com/paritytech/substrate/issues/2114
+            AccountId,    // from
+            AccountId,    // to
+            Discriminant, // token_id
+            TokenBalance  // value
         ),
     }
 );
@@ -305,5 +287,4 @@ mod test {
             assert_eq!(TemplateModule::balance_of((TokenType::B, C)), 0);
         });
     }
-
 }
