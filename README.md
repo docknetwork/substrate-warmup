@@ -21,8 +21,13 @@ cargo +nightly install --git https://github.com/alexcrichton/wasm-gc --force
 You can run the dev testnet chain with:
 
 ```bash
-cargo run -- --chain=ved
-
-# or with detailed logs
-RUST_LOG=debug RUST_BACKTRACE=1 cargo run -- --chain=ved
+cargo run --release -- --chain=ved --alice
+#         ^^^^^^^^^    ^^^^^^^^^^^ ^^^^^^^
+#             |             |         |
+#             |             |  Use the publicly known keypair, 'Alice', to produce blocks.
+#             |             |
+#             |     Starting the dev chain.
+#             |
+# The runtime is executed purley in Wasm. The naitive runtime is disabled for this chain.
+# Wasmi sometimes can't keep up with block production unless compiled with optimizations.
 ```
