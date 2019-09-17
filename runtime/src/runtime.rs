@@ -15,6 +15,7 @@ use client::{
     block_builder::api::{self as block_builder_api, CheckInherentsResult, InherentData},
     impl_runtime_apis, runtime_api as client_api,
 };
+use codec::{Decode, Encode};
 use grandpa::fg_primitives::{self, ScheduledChange};
 use grandpa::{AuthorityId as GrandpaId, AuthorityWeight as GrandpaWeight};
 use primitives::{crypto::key_types, OpaqueMetadata};
@@ -250,6 +251,13 @@ impl sudo::Trait for Runtime {
 impl erc20::Trait for Runtime {
     type Event = Event;
     type TokenBalance = u128;
+    type Discriminant = TokenType;
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Decode, Encode)]
+pub enum TokenType {
+    PDock,
+    PStable,
 }
 
 impl voting::Trait for Runtime {

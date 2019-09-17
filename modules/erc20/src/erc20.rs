@@ -1,25 +1,18 @@
-use codec::{Codec, Decode, Encode};
+use codec::{Decode, Encode};
+use core::fmt::Debug;
 use rstd::prelude::*;
-use sr_primitives::traits::{CheckedAdd, CheckedSub, Member, SimpleArithmetic};
-use support::{
-    decl_event, decl_module, decl_storage, dispatch::Result, ensure, Parameter, StorageMap,
-    StorageValue,
-};
+use sr_primitives::traits::{CheckedAdd, CheckedSub, SimpleArithmetic};
+use support::{decl_event, decl_module, decl_storage, dispatch::Result, StorageMap};
 use system::{self, ensure_signed};
 
 // the module trait
 // contains type definitions
 pub trait Trait: system::Trait {
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
-    type TokenBalance: Parameter + Member + SimpleArithmetic + Codec + Default + Copy;
-}
-
-// struct to store the token details
-#[derive(Encode, Decode, Default, Clone, PartialEq, Debug)]
-pub struct Erc20Token<U> {
-    name: Vec<u8>,
-    ticker: Vec<u8>,
-    total_supply: U,
+    /// Numerical type for storing balance
+    type TokenBalance: Debug + SimpleArithmetic + Encode + Decode + Default + Copy;
+    /// Token id
+    type Discriminant: Debug + PartialEq + Encode + Decode + Copy;
 }
 
 // public interface for this runtime module
@@ -28,71 +21,37 @@ decl_module! {
         // initialize the default event for this module
         fn deposit_event() = default;
 
-        // initializes a new token
-        // generates an integer token_id so that all tokens are unique
-        // takes a name, ticker, total supply for the token
-        // makes the initiating account the owner of the token
-        // the balance of the owner is set to total supply
-        fn init(origin, name: Vec<u8>, ticker: Vec<u8>, total_supply: T::TokenBalance) -> Result {
-            let sender = ensure_signed(origin)?;
-
-            // checking max size for name and ticker
-            // byte arrays (vecs) with no max size should be avoided
-            ensure!(name.len() <= 64, "token name cannot exceed 64 bytes");
-            ensure!(ticker.len() <= 32, "token ticker cannot exceed 32 bytes");
-
-            let token_id = Self::token_id();
-            let next_token_id = token_id.checked_add(1).ok_or("overflow in calculating next token id")?;
-            TokenId::put(next_token_id);
-
-            let token = Erc20Token {
-                name,
-                ticker,
-                total_supply,
-            };
-
-            <Tokens<T>>::insert(token_id, token);
-            <BalanceOf<T>>::insert((token_id, sender), total_supply);
-
-            Ok(())
-        }
-
         // transfer tokens from one account to another
         // origin is assumed as sender
-        fn transfer(_origin, token_id: u32, to: T::AccountId, value: T::TokenBalance) -> Result {
-            let sender = ensure_signed(_origin)?;
-            Self::_transfer(token_id, sender, to, value)
-        }
+        fn transfer(
+            origin,
+            to: <T as system::Trait>::AccountId,
+            token_id: T::Discriminant,
+            value: T::TokenBalance
+        ) -> Result {
+            let sender = ensure_signed(origin)?;
 
-        // approve token transfer from one account to another
-        // once this is done, transfer_from can be called with corresponding values
-        fn approve(_origin, token_id: u32, spender: T::AccountId, value: T::TokenBalance) -> Result {
-            let sender = ensure_signed(_origin)?;
-            ensure!(<BalanceOf<T>>::exists((token_id, sender.clone())), "Account does not own this token");
+            // reduce sender's balance
+            <BalanceOf<T>>::insert(
+                (token_id, sender.clone()),
+                Self::balance_of((token_id, sender.clone()))
+                    .checked_sub(&value)
+                    .ok_or("Not enough balance.")?,
+            );
 
-            let allowance = Self::allowance((token_id, sender.clone(), spender.clone()));
-            let updated_allowance = allowance.checked_add(&value).ok_or("overflow in calculating allowance")?;
-            <Allowance<T>>::insert((token_id, sender.clone(), spender.clone()), updated_allowance);
+            // increase receiver's balance
+            <BalanceOf<T>>::insert(
+                (token_id, to.clone()),
+                Self::balance_of((token_id, to.clone()))
+                    .checked_add(&value)
+                    .expect(
+                        "Resultant balance was greater than max value for TokenBalance. This \
+                         represents a catostrophic error.",
+                    ),
+            );
 
-            Self::deposit_event(RawEvent::Approval(token_id, sender.clone(), spender.clone(), value));
-
+            Self::deposit_event(RawEvent::Transfer(sender, to, token_id, value));
             Ok(())
-        }
-
-        // the ERC20 standard transfer_from function
-        // implemented in the open-zeppelin way - increase/decrease allownace
-        // if approved, transfer from an account to another account without owner's signature
-        pub fn transfer_from(_origin, token_id: u32, from: T::AccountId, to: T::AccountId, value: T::TokenBalance) -> Result {
-            ensure!(<Allowance<T>>::exists((token_id, from.clone(), to.clone())), "Allowance does not exist.");
-            let allowance = Self::allowance((token_id, from.clone(), to.clone()));
-            ensure!(allowance >= value, "Not enough allowance.");
-
-            // using checked_sub (safe math) to avoid overflow
-            let updated_allowance = allowance.checked_sub(&value).ok_or("overflow in calculating allowance")?;
-            <Allowance<T>>::insert((token_id, from.clone(), to.clone()), updated_allowance);
-
-            Self::deposit_event(RawEvent::Approval(token_id, from.clone(), to.clone(), value));
-            Self::_transfer(token_id, from, to, value)
         }
     }
 }
@@ -100,69 +59,31 @@ decl_module! {
 // storage for this module
 decl_storage! {
     trait Store for Module<T: Trait> as Erc20 {
-        // token id nonce for storing the next token id available for token initialization
-        // inspired by the AssetId in the SRML assets module
-        TokenId get(token_id): u32;
-        // details of the token corresponding to a token id
-        Tokens get(token_details): map u32 => Erc20Token<T::TokenBalance>;
         // balances mapping for an account and token
-        BalanceOf get(balance_of): map (u32, T::AccountId) => T::TokenBalance;
-        // allowance for an account and token
-        Allowance get(allowance): map (u32, T::AccountId, T::AccountId) => T::TokenBalance;
+        BalanceOf get(balance_of): map (T::Discriminant, T::AccountId) => T::TokenBalance;
     }
 }
 
-// events
+#[cfg_attr(rustfmt, rustfmt_skip)]
 decl_event!(
     pub enum Event<T>
     where
         AccountId = <T as system::Trait>::AccountId,
-        Balance = <T as self::Trait>::TokenBalance,
+        Discriminant = <T as Trait>::Discriminant,
+        TokenBalance = <T as Trait>::TokenBalance,
     {
-        // event for transfer of tokens
-        // tokenid, from, to, value
-        Transfer(u32, AccountId, AccountId, Balance),
-        // event when an approval is made
-        // tokenid, owner, spender, value
-        Approval(u32, AccountId, AccountId, Balance),
+        Transfer(
+            // from
+            AccountId,
+            // to
+            AccountId,
+            // tokenid
+            Discriminant,
+            // value
+            TokenBalance // https://github.com/paritytech/substrate/issues/2114
+        ),
     }
 );
-
-// implementation of mudule
-// utility and private functions
-// if marked public, accessible by other modules
-impl<T: Trait> Module<T> {
-    // the ERC20 standard transfer function
-    // internal
-    fn _transfer(
-        token_id: u32,
-        from: T::AccountId,
-        to: T::AccountId,
-        value: T::TokenBalance,
-    ) -> Result {
-        // reduce sender's balance
-        <BalanceOf<T>>::insert(
-            (token_id, from.clone()),
-            Self::balance_of((token_id, from.clone()))
-                .checked_sub(&value)
-                .ok_or("Not enough balance.")?,
-        );
-
-        // increase receiver's balance
-        <BalanceOf<T>>::insert(
-            (token_id, to.clone()),
-            Self::balance_of((token_id, to.clone()))
-                .checked_add(&value)
-                .expect(
-                    "Resultant balance was greater than u128::max_value(). This represents a \
-                     catostrophic error.",
-                ),
-        );
-
-        Self::deposit_event(RawEvent::Transfer(token_id, from, to, value));
-        Ok(())
-    }
-}
 
 #[cfg(test)]
 mod test {
@@ -214,8 +135,15 @@ mod test {
     impl Trait for Test {
         type Event = ();
         type TokenBalance = u128;
+        type Discriminant = TokenType;
     }
     type TemplateModule = Module<Test>;
+
+    #[derive(Debug, PartialEq, Eq, Clone, Copy, Decode, Encode)]
+    pub enum TokenType {
+        A,
+        B,
+    }
 
     /// test accounts
     const A: u64 = 0;
@@ -231,158 +159,151 @@ mod test {
             .into()
     }
 
+    // set account balance of bene for token_id to total_supply
+    fn cheat_in(bene: u64, token_id: TokenType, total_supply: u128) {
+        <BalanceOf<Test>>::insert((token_id, bene), total_supply);
+    }
+
     /// send tokens from A to B
     #[test]
     fn xfer() {
         with_externalities(&mut new_test_ext(), || {
-            // create a new token as A
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
+            cheat_in(A, TokenType::A, 10);
 
             // transfer to B
-            TemplateModule::transfer(Origin::signed(A), 0, B, 4).unwrap();
+            TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 4).unwrap();
 
             // A has 6
-            assert_eq!(TemplateModule::balance_of((0, A)), 6);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 6);
 
             // B has 4
-            assert_eq!(TemplateModule::balance_of((0, B)), 4);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, B)), 4);
         });
     }
 
     #[test]
-    fn init() {
+    fn cheat_in_meta() {
         with_externalities(&mut new_test_ext(), || {
-            assert_eq!(TemplateModule::balance_of((0, A)), 0);
-            assert_eq!(TemplateModule::balance_of((1, A)), 0);
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
-            assert_eq!(TemplateModule::balance_of((0, A)), 10);
-            assert_eq!(TemplateModule::balance_of((1, A)), 0);
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
-            assert_eq!(TemplateModule::balance_of((0, A)), 10);
-            assert_eq!(TemplateModule::balance_of((1, A)), 10);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 0);
+            assert_eq!(TemplateModule::balance_of((TokenType::B, A)), 0);
+            cheat_in(A, TokenType::A, 10);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
+            assert_eq!(TemplateModule::balance_of((TokenType::B, A)), 0);
+            cheat_in(A, TokenType::B, 10);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
+            assert_eq!(TemplateModule::balance_of((TokenType::B, A)), 10);
         });
     }
 
     #[test]
     fn transfer_pong() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
-            assert_eq!(TemplateModule::balance_of((0, A)), 10);
-            assert_eq!(TemplateModule::balance_of((0, B)), 0);
-            TemplateModule::transfer(Origin::signed(A), 0, B, 1).unwrap();
-            assert_eq!(TemplateModule::balance_of((0, A)), 9);
-            assert_eq!(TemplateModule::balance_of((0, B)), 1);
-            TemplateModule::transfer(Origin::signed(B), 0, A, 1).unwrap();
-            assert_eq!(TemplateModule::balance_of((0, A)), 10);
-            assert_eq!(TemplateModule::balance_of((0, B)), 0);
-            TemplateModule::transfer(Origin::signed(A), 0, B, 1).unwrap();
-            assert_eq!(TemplateModule::balance_of((0, A)), 9);
-            assert_eq!(TemplateModule::balance_of((0, B)), 1);
-            TemplateModule::transfer(Origin::signed(B), 0, A, 1).unwrap();
-            assert_eq!(TemplateModule::balance_of((0, A)), 10);
-            assert_eq!(TemplateModule::balance_of((0, B)), 0);
+            cheat_in(A, TokenType::A, 10);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, B)), 0);
+            TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 1).unwrap();
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 9);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, B)), 1);
+            TemplateModule::transfer(Origin::signed(B), A, TokenType::A, 1).unwrap();
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, B)), 0);
+            TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 1).unwrap();
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 9);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, B)), 1);
+            TemplateModule::transfer(Origin::signed(B), A, TokenType::A, 1).unwrap();
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, B)), 0);
         });
     }
 
     #[test]
     fn transfer_before_create() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::transfer(Origin::signed(A), 0, B, 1).unwrap_err();
-            TemplateModule::transfer(Origin::signed(B), 0, A, 1).unwrap_err();
-            TemplateModule::transfer(Origin::signed(A), 1, B, 1).unwrap_err();
+            TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 1).unwrap_err();
+            TemplateModule::transfer(Origin::signed(B), A, TokenType::A, 1).unwrap_err();
+            TemplateModule::transfer(Origin::signed(A), B, TokenType::B, 1).unwrap_err();
         });
     }
 
     #[test]
     fn transfer_none() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
-            TemplateModule::transfer(Origin::signed(A), 0, B, 0).unwrap();
+            cheat_in(A, TokenType::A, 10);
+            TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 0).unwrap();
         });
     }
 
     #[test]
     fn transfer_twice() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
-            TemplateModule::transfer(Origin::signed(A), 0, B, 5).unwrap();
-            TemplateModule::transfer(Origin::signed(A), 0, B, 5).unwrap();
-            TemplateModule::transfer(Origin::signed(A), 0, B, 5).unwrap_err();
+            cheat_in(A, TokenType::A, 10);
+            TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 5).unwrap();
+            TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 5).unwrap();
+            TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 5).unwrap_err();
         });
     }
 
     #[test]
     fn transfer_overflow() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(
-                Origin::signed(A),
-                b"Trash".to_vec(),
-                b"TRS".to_vec(),
-                u128::max_value(),
-            )
-            .unwrap();
-            TemplateModule::transfer(Origin::signed(A), 0, B, u128::max_value()).unwrap();
-            assert_eq!(TemplateModule::balance_of((0, A)), 0);
-            assert_eq!(TemplateModule::balance_of((0, B)), u128::max_value());
+            cheat_in(A, TokenType::A, u128::max_value());
+            TemplateModule::transfer(Origin::signed(A), B, TokenType::A, u128::max_value())
+                .unwrap();
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 0);
+            assert_eq!(
+                TemplateModule::balance_of((TokenType::A, B)),
+                u128::max_value()
+            );
         });
     }
 
     #[test]
     fn transfer_too_much() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
-            TemplateModule::transfer(Origin::signed(A), 0, B, 11).unwrap_err();
-            assert_eq!(TemplateModule::balance_of((0, A)), 10);
-            assert_eq!(TemplateModule::balance_of((0, B)), 0);
+            cheat_in(A, TokenType::A, 10);
+            TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 11).unwrap_err();
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, B)), 0);
         });
     }
 
     #[test]
     fn transfer_to_self() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
-            TemplateModule::transfer(Origin::signed(A), 0, A, 10).unwrap();
-            assert_eq!(TemplateModule::balance_of((0, A)), 10);
+            cheat_in(A, TokenType::A, 10);
+            TemplateModule::transfer(Origin::signed(A), A, TokenType::A, 10).unwrap();
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
         });
     }
 
     #[test]
     fn transfer_too_much_to_self() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
-            TemplateModule::transfer(Origin::signed(A), 0, A, 11).unwrap_err();
-            assert_eq!(TemplateModule::balance_of((0, A)), 10);
+            cheat_in(A, TokenType::A, 10);
+            TemplateModule::transfer(Origin::signed(A), A, TokenType::A, 11).unwrap_err();
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
         });
     }
 
     #[test]
     fn transfer_zero_to_self() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
-            TemplateModule::transfer(Origin::signed(A), 0, A, 0).unwrap();
-            assert_eq!(TemplateModule::balance_of((0, A)), 10);
+            cheat_in(A, TokenType::A, 10);
+            TemplateModule::transfer(Origin::signed(A), A, TokenType::A, 0).unwrap();
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
         });
     }
 
     #[test]
     fn default_balance_zero() {
         with_externalities(&mut new_test_ext(), || {
-            assert_eq!(TemplateModule::balance_of((0, A)), 0);
-            assert_eq!(TemplateModule::balance_of((0, B)), 0);
-            assert_eq!(TemplateModule::balance_of((0, C)), 0);
-            assert_eq!(TemplateModule::balance_of((1, A)), 0);
-            assert_eq!(TemplateModule::balance_of((1, B)), 0);
-            assert_eq!(TemplateModule::balance_of((1, C)), 0);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 0);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, B)), 0);
+            assert_eq!(TemplateModule::balance_of((TokenType::A, C)), 0);
+            assert_eq!(TemplateModule::balance_of((TokenType::B, A)), 0);
+            assert_eq!(TemplateModule::balance_of((TokenType::B, B)), 0);
+            assert_eq!(TemplateModule::balance_of((TokenType::B, C)), 0);
         });
     }
+
 }
