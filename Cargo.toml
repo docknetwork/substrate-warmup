@@ -93,6 +93,6 @@ vergen = "3"
 [workspace]
 members = [
     "runtime",
-    "modules/erc20",
+    "modules/multi-token",
     "modules/voting",
 ]

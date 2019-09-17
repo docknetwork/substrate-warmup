@@ -251,7 +251,7 @@ impl sudo::Trait for Runtime {
     type Proposal = Call;
 }
 
-impl erc20::Trait for Runtime {
+impl multi_token::Trait for Runtime {
     type Event = Event;
     type TokenBalance = u128;
     type Discriminant = TokenType;
@@ -287,7 +287,7 @@ construct_runtime!(
         Indices: indices::{default, Config<T>},
         Balances: balances,
         Sudo: sudo,
-        Erc20: erc20::{Module, Call, Storage, Config<T>, Event<T>},
+        MultiToken: multi_token::{Module, Call, Storage, Config<T>, Event<T>},
         Voting: voting::{Module, Call, Storage, Event<T>},
     }
 );

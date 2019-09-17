@@ -1,7 +1,7 @@
 # Substrate Warmup
 
-A Parity Substrate SRML baseline module for DockChain based on the ERC20 Multi [module](https://github.com/substrate-developer-hub/substrate-erc20-multi) and [substrate node template](https://github.com/paritytech/substrate/tree/afa583011eed3e8d49ee823257a3b448a24e213b/node-template).
-The primary purpose is to work toward a core chain and module config, which includes the multi token module and a voting module.
+A Parity Substrate SRML baseline module for DockChain. The primary purpose is to work toward a core
+chain and module config, which includes a multi token module and a voting module.
 
 # Requires
 
@@ -18,11 +18,11 @@ cargo +nightly install --git https://github.com/alexcrichton/wasm-gc --force
 
 # Run
 
-You can join the entnet (initial testnet) chain with:
+You can run the dev testnet chain with:
 
 ```bash
-cargo run -- --chain=entnet
+cargo run -- --chain=ved
 
 # or with detailed logs
-RUST_LOG=debug RUST_BACKTRACE=1 cargo run -- --chain=entnet
+RUST_LOG=debug RUST_BACKTRACE=1 cargo run -- --chain=ved
 ```

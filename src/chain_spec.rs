@@ -1,8 +1,8 @@
 use babe_primitives::AuthorityId as BabeId;
 use grandpa_primitives::AuthorityId as GrandpaId;
 use node_template_runtime::{
-    AccountId, BabeConfig, BalancesConfig, Erc20Config, GenesisConfig, GrandpaConfig,
-    IndicesConfig, SudoConfig, SystemConfig, TokenType, WASM_BINARY,
+    AccountId, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig, IndicesConfig,
+    MultiTokenConfig, SudoConfig, SystemConfig, TokenType, WASM_BINARY,
 };
 use primitives::{Pair, Public};
 use substrate_service;
@@ -146,7 +146,7 @@ fn testnet_genesis(
                 .map(|x| (x.2.clone(), 1))
                 .collect(),
         }),
-        erc20: Some(Erc20Config {
+        multi_token: Some(MultiTokenConfig {
             balances: {
                 let mut ret = Vec::new();
                 for token in &[TokenType::PDock, TokenType::PStable] {
