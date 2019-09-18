@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - run: rustup toolchain add nightly
     - run: rustup target add --toolchain nightly wasm32-unknown-unknown
     - run: cargo +nightly install --git https://github.com/alexcrichton/wasm-gc
     - uses: actions/checkout@v1
