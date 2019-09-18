@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   setup:
+    runs-on: ubuntu-latest
     container: parity/rust-builder:latest
     steps:
     - uses: actions/checkout@v1
