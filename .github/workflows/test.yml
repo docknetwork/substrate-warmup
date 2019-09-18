@@ -4,19 +4,18 @@ on: [push]
 
 jobs:
   setup:
-
-    runs-on: ubuntu-latest
     container: parity/rust-builder:latest
-
     steps:
     - uses: actions/checkout@v1
 
   test:
+    runs-on: ubuntu-latest
     needs: setup
     steps:
     - run: cargo test --all
 
   fmt:
+    runs-on: ubuntu-latest
     needs: setup
     steps:
     - run: cargo fmt --all -- --check
