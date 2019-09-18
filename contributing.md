@@ -7,7 +7,7 @@
 
 # Reproducing
 
-<minimal code and/or instuctions>
+<minimal code and/or instructions>
 
 # Expected
 
@@ -25,3 +25,6 @@ Use of [clippy](https://github.com/rust-lang/rust-clippy) is suggested.
 The [rust api guidelines](https://rust-lang-nursery.github.io/api-guidelines/about.html) are valued.
 
 [rustfmt](https://github.com/rust-lang/rustfmt) is used.
+
+Changes should be accompanied by tests.
+
