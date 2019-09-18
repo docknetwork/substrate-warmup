@@ -1,7 +1,7 @@
 # Substrate Warmup
 
-A Parity Substrate SRML baseline module for DockChain based on the ERC20 Multi [module](https://github.com/substrate-developer-hub/substrate-erc20-multi) and [substrate node template](https://github.com/paritytech/substrate/tree/afa583011eed3e8d49ee823257a3b448a24e213b/node-template).
-The primary purpose is to work toward a core chain and module config, which includes the multi token module and a voting module.
+A Parity Substrate SRML baseline module for DockChain. The primary purpose is to work toward a core
+chain and module config, which includes a multi token module and a voting module.
 
 # Requires
 
@@ -18,11 +18,35 @@ cargo +nightly install --git https://github.com/alexcrichton/wasm-gc --force
 
 # Run
 
-You can join the entnet (initial testnet) chain with:
+You can run the dev testnet chain with:
 
 ```bash
-cargo run -- --chain=entnet
-
-# or with detailed logs
-RUST_LOG=debug RUST_BACKTRACE=1 cargo run -- --chain=entnet
+cargo run --release -- --chain=ved --alice
+#         ^^^^^^^^^    ^^^^^^^^^^^ ^^^^^^^
+#             |             |         |
+#             |             |  Use the publicly known keypair, 'Alice', to produce blocks.
+#             |             |
+#             |     Starting the dev chain.
+#             |
+# The runtime is executed purley in Wasm. The naitive runtime is disabled for this chain.
+# Wasmi sometimes can't keep up with block production unless compiled with optimizations.
 ```
+
+# Using the polkadot js api
+
+Once the dev chain is running, you can interact with it via browser.
+
+Go to https://polkadot.js.org/apps/#/settings and set "remote endpoint" to your locally running node 127.0.0.1.
+
+Copy the type definitions in "./ui-types.json" to https://polkadot.js.org/apps/#/settings/developer and save.
+
+To interact with the dev chain, you'll need to load the private key for the superuser, Alice, into the browser ui.
+Go to https://polkadot.js.org/apps/#/accounts and add an account with the publicly known seed
+`bottom drive obey lake curtain smoke basket hold race lonely fit walk`. Derive the Alice key from the dev seed
+using "//Alice" as the derivation path on an sr25519 key.
+
+Once the key is loaded, you should see that Alice has a large account balance.
+
+To try out the multi-token module, go to https://polkadot.js.org/apps/#/extrinsics. You may need another dummy
+account if you want to send PDock and PStable around. Unter the multiToken module in the extrinsics page, find
+the transfer() function which will send tokens. Set `token_id` to true for PDock, false for PStable.

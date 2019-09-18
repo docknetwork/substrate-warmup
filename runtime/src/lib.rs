@@ -11,8 +11,9 @@ mod runtime;
 #[cfg(feature = "std")]
 pub use runtime::{
     native_version, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig, IndicesConfig,
-    SudoConfig, SystemConfig, WASM_BINARY,
+    MultiTokenConfig, SudoConfig, SystemConfig, TokenType, WASM_BINARY,
 };
+
 // The following is only made public only when compiling with feature = "std".
 #[cfg(feature = "std")]
 pub use runtime::{api, opaque, AccountId, RuntimeApi};
@@ -35,6 +36,7 @@ mod tests {
             indices: None,
             sudo: None,
             system: None,
+            multi_token: None,
         }
         .build_storage()
         .unwrap()

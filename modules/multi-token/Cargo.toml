@@ -1,5 +1,5 @@
 [package]
-name = "erc20"
+name = "multi-token"
 version = "0.1.0"
 authors = []
 edition = "2018"

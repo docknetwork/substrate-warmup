@@ -1,8 +1,8 @@
 use babe_primitives::AuthorityId as BabeId;
 use grandpa_primitives::AuthorityId as GrandpaId;
 use node_template_runtime::{
-    AccountId, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig, IndicesConfig, SudoConfig,
-    SystemConfig, WASM_BINARY,
+    AccountId, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig, IndicesConfig,
+    MultiTokenConfig, SudoConfig, SystemConfig, TokenType, WASM_BINARY,
 };
 use primitives::{Pair, Public};
 use substrate_service;
@@ -89,7 +89,7 @@ impl Alternative {
                     testnet_genesis(
                         vec![get_authority_keys_from_seed("Alice")],
                         get_from_seed::<AccountId>("Alice"),
-                        vec![],
+                        vec![get_from_seed::<AccountId>("Alice")],
                     )
                 },
                 vec![],
@@ -115,6 +115,8 @@ fn testnet_genesis(
     root_key: AccountId,
     endowed_accounts: Vec<AccountId>,
 ) -> GenesisConfig {
+    const ENDOWMENT: u128 = 1 << 60;
+
     GenesisConfig {
         system: Some(SystemConfig {
             code: WASM_BINARY.to_vec(),
@@ -127,7 +129,7 @@ fn testnet_genesis(
             balances: endowed_accounts
                 .iter()
                 .cloned()
-                .map(|k| (k, 1 << 60))
+                .map(|k| (k, ENDOWMENT))
                 .collect(),
             vesting: vec![],
         }),
@@ -143,6 +145,21 @@ fn testnet_genesis(
                 .iter()
                 .map(|x| (x.2.clone(), 1))
                 .collect(),
+        }),
+        multi_token: Some(MultiTokenConfig {
+            balances: {
+                let mut ret = Vec::new();
+                for token in &[TokenType::PDock, TokenType::PStable] {
+                    ret.extend(
+                        endowed_accounts
+                            .iter()
+                            .cloned()
+                            .map(|account| ((*token, account), ENDOWMENT))
+                            .collect::<Vec<_>>(),
+                    );
+                }
+                ret
+            },
         }),
     }
 }
