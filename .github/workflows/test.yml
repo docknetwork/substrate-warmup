@@ -3,11 +3,20 @@ name: Test
 on: [push]
 
 jobs:
-  test:
+  setup:
 
     runs-on: ubuntu-latest
     container: parity/rust-builder:latest
 
     steps:
     - uses: actions/checkout@v1
+
+  test:
+    needs: setup
+    steps:
     - run: cargo test --all
+
+  fmt:
+    needs: setup
+	steps:
+	- run: cargo fmt --all -- --check
