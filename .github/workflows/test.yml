@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   test:
+    runs-on: ubuntu-latest
     container: node:10.16-jessie
     steps:
     - run: cargo test --all
