@@ -5,7 +5,7 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: node:10.16-jessie
+    container: './docker/builder/Dockerfile'
     steps:
     - run: cargo test --all
 
