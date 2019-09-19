@@ -4,10 +4,16 @@ on: [push]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - runs:
-        using: 'docker'
-        image: './docker/builder/Dockerfile'
-    # - run: cargo test --all
+    container:
+      image: node:10.16-jessie
+
+
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - uses: actions/checkout@v1
+#     - runs:
+#         using: 'docker'
+#         image: './docker/builder/Dockerfile'
+#     # - run: cargo test --all
