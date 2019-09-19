@@ -5,10 +5,11 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: './docker/builder/Dockerfile'
     steps:
-    - run: cargo test --all
-
+    - uses: ./docker/builder
+      with:
+        entrypoint: /bin/echo
+        args: The ${{ github.event_name }} event triggered this step.
 
 # jobs:
 #   test:
