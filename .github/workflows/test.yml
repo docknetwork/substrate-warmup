@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   test:
+    runs-on: ubuntu-latest
     container: ./docker/builder/Dockerfile
     steps:
     - uses: actions/checkout@v1
