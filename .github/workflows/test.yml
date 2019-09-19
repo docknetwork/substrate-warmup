@@ -6,6 +6,7 @@ jobs:
   test:
     container:
       image: node:10.16-jessie
+    - run: cargo test --all
 
 
 # jobs:
