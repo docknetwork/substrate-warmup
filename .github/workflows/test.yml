@@ -4,15 +4,7 @@ on: [push]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    container: parity/rust-builder:latest
+    container: ./docker/builder/Dockerfile
     steps:
     - uses: actions/checkout@v1
     - run: cargo test --all
-
-  fmt:
-    runs-on: ubuntu-latest
-    container: parity/rust-builder:latest
-    steps:
-    - uses: actions/checkout@v1
-    - run: cargo fmt --all -- --check
