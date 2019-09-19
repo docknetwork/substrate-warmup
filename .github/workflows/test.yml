@@ -5,8 +5,8 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
-    using: 'docker'
-    image: ./docker/builder/Dockerfile
     steps:
     - uses: actions/checkout@v1
-    - run: cargo test --all
+    - using: 'docker'
+      image: './docker/builder/Dockerfile'
+    # - run: cargo test --all
