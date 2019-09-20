@@ -9,8 +9,10 @@ jobs:
     - uses: actions/checkout@v1
     - uses: ./docker/builder
       with:
-        entrypoint: /bin/echo
-        args: The ${{ github.event_name }} event triggered this step.
+        entrypoint: /bin/bash -c
+        args: |
+          set -uexo pipefail
+          cargo test --all
 
 # jobs:
 #   test:
