@@ -44,6 +44,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore] // not yet implemented
     fn it_works_for_default_value() {
         with_externalities(&mut new_test_ext(), || {
             unimplemented!()
@@ -56,6 +57,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore] // not yet implemented
     fn call_wasm_runtime() {
         // create test-chain
         // load and use wasm module

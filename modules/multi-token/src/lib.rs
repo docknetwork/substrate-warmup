@@ -3,6 +3,6 @@
 mod multi_token;
 
 #[cfg(feature = "std")]
-pub use multi_token::GenesisConfig;
+pub use crate::multi_token::GenesisConfig;
 
-pub use multi_token::{Event, Module, Trait, __InherentHiddenInstance};
+pub use crate::multi_token::{Event, Module, Trait, __InherentHiddenInstance};
