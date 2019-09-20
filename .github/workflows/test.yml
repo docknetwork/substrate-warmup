@@ -7,19 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - uses: ./docker/builder
+    - uses: docker://docknetwork/docknetwork-substrate-builder:tagname
       with:
         entrypoint: /bin/bash -c
         args: |
           set -uexo pipefail
           cargo test --all
-
-# jobs:
-#   test:
-#     runs-on: ubuntu-latest
-#     steps:
-#     - uses: actions/checkout@v1
-#     - runs:
-#         using: 'docker'
-#         image: './docker/builder/Dockerfile'
-#     # - run: cargo test --all

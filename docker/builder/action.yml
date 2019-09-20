@@ -1,7 +1,0 @@
-name: 'In builder'
-
-description: 'Run something in a container defined in the adjacent Dockerfile.'
-
-runs:
-  using: 'docker'
-  image: 'Dockerfile'
