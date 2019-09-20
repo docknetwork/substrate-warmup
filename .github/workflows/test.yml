@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - uses: docker://docknetwork/docknetwork-substrate-builder:latest
+    - uses: docker://parity/rust-builder:latest
       with:
         args: cargo test --all
 
