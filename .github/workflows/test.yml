@@ -8,8 +8,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: docker://docknetwork/docknetwork-substrate-builder:latest
-      with:
-        entrypoint: /bin/bash -c
-        args: |
-          set -uexo pipefail
-          cargo test --all
+      run: |
+        set -uexo pipefail
+        cargo test --all
