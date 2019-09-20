@@ -8,4 +8,5 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: docker://docknetwork/docknetwork-substrate-builder:latest
-      args: cargo test --all
+      with:
+        args: cargo test --all
