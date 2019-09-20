@@ -10,3 +10,9 @@ jobs:
     - uses: docker://docknetwork/docknetwork-substrate-builder:latest
       with:
         args: cargo test --all
+
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - run: cargo fmt --all -- --check
