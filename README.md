@@ -9,6 +9,9 @@ chain and module config, which includes a multi token module and a voting module
 # Rust
 curl https://sh.rustup.rs -sSf | sh
 
+# Nightly toolchain for building runtime
+rustup toolchain add nightly
+
 # wasm32-unknown-unknown target
 rustup target add wasm32-unknown-unknown --toolchain nightly
 
