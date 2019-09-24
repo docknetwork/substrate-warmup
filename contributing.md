@@ -26,5 +26,4 @@ The [rust api guidelines](https://rust-lang-nursery.github.io/api-guidelines/abo
 
 [rustfmt](https://github.com/rust-lang/rustfmt) is used.
 
-Changes should be accompanied by tests.
-
+Code changes should covered by tests.
