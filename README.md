@@ -3,7 +3,18 @@
 A Parity Substrate SRML baseline module for DockChain. The primary purpose is to work toward a core
 chain and module config, which includes a multi token module and a voting module.
 
-# Requires
+# Quick setup using Docker
+
+```
+docker build -t full-node .
+docker run -p 6644:6644 full-node --alice
+```
+
+See the Dockerfile for more details.
+
+# Development setup
+
+## Requires
 
 ```bash
 # Rust
@@ -23,7 +34,7 @@ git clone https://github.com/paritytech/substrate.git
 cargo install --path substrate --force
 ```
 
-# Run
+## Run
 
 You can run the dev testnet chain with:
 
@@ -54,7 +65,7 @@ substrate --chain ./tmp/chainspec.json --alice --base-path ./tmp
 # Run the chain specification we specified in the previous command.
 ```
 
-# Using the polkadot js api
+# Using the polkadot js UI
 
 Once the dev chain is running, you can interact with it via browser.
 
