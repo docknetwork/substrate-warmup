@@ -3,7 +3,18 @@
 A Parity Substrate SRML baseline module for DockChain. The primary purpose is to work toward a core
 chain and module config, which includes a multi token module and a voting module.
 
-# Requires
+# Quick setup using Docker
+
+```
+docker build -t full-node .
+docker run -p 6644:6644 full-node --alice
+```
+
+See the Dockerfile for more details.
+
+# Development setup
+
+## Requires
 
 ```bash
 # Rust
@@ -17,25 +28,44 @@ rustup target add wasm32-unknown-unknown --toolchain nightly
 
 # wasm-gc
 cargo +nightly install --git https://github.com/alexcrichton/wasm-gc --force
+
+# substrate
+git clone https://github.com/paritytech/substrate.git
+cargo install --path substrate --force
 ```
 
-# Run
+## Run
 
 You can run the dev testnet chain with:
 
 ```bash
-cargo run --release -- --chain=ved --alice
-#         ^^^^^^^^^    ^^^^^^^^^^^ ^^^^^^^
-#             |             |         |
-#             |             |  Use the publicly known keypair, 'Alice', to produce blocks.
-#             |             |
-#             |     Starting the dev chain.
+# make a temporary directory in which to store chain data
+mkdir -p tmp
+
+# create a chainspec
+cargo run --release -- ved > tmp/chainspec.json
+#         ^^^^^^^^^    ^^^ ^^^^^^^^^^^^^^^^^^^^
+#             |         |         |
+#             |         | Dump the chainspec into a file which we'll use in the next step.
+#             |         |
+#             | Specify the dev chain.
 #             |
 # The runtime is executed purley in Wasm. The naitive runtime is disabled for this chain.
 # Wasmi sometimes can't keep up with block production unless compiled with optimizations.
+# In addition to the being slow, the runtime much larger when compiled without --release.
+
+# run created chainspec using substrate
+substrate --chain ./tmp/chainspec.json --alice --base-path ./tmp
+#         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^ ^^^^^^^^^^^^^^^^^
+#             |                           |            |
+#             |                           | Store chain data in a temporary directory.
+#             |                           |
+#             | Use the publicly known keypair, 'Alice', to produce blocks.
+#             |
+# Run the chain specification we specified in the previous command.
 ```
 
-# Using the polkadot js api
+# Using the polkadot js UI
 
 Once the dev chain is running, you can interact with it via browser.
 

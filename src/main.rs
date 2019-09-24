@@ -1,28 +1,16 @@
-//! Substrate Node Template CLI library.
-
-#![warn(missing_docs)]
-#![warn(unused_extern_crates)]
-
 mod chain_spec;
-#[macro_use]
-mod service;
-mod cli;
 
-pub use substrate_cli::{error, IntoExit, VersionInfo};
+#[derive(structopt::StructOpt)]
+/// generate a substrate chainspec
+enum Chain {
+    /// Prints the chainspec for a shared testnet with bddap as validator
+    Ent,
+    /// Prints the chainspec for a testnet with Alice as validator
+    Ved,
+}
 
-fn main() {
-    let version = VersionInfo {
-        name: "Substrate Node",
-        commit: env!("VERGEN_SHA_SHORT"),
-        version: env!("CARGO_PKG_VERSION"),
-        executable_name: "node-template",
-        author: "Anonymous",
-        description: "Template Node",
-        support_url: "support.anonymous.an",
-    };
-
-    if let Err(e) = cli::run(::std::env::args(), cli::Exit, version) {
-        eprintln!("Fatal error: {}\n\n{:?}", e, e);
-        std::process::exit(1)
-    }
+#[paw::main]
+fn main(chain: Chain) {
+    let spec = chain_spec::generate(chain);
+    println!("{}", spec.to_json(true).unwrap());
 }

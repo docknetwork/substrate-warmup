@@ -87,7 +87,7 @@ pub mod opaque {
 
 /// This runtime version.
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("subsrate-warmup"),
+    spec_name: create_runtime_str!("dock-subsrate-warmup"),
     impl_name: create_runtime_str!("rusty"),
     authoring_version: 1,
     spec_version: 1,
