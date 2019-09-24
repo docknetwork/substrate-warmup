@@ -7,7 +7,7 @@ chain and module config, which includes a multi token module and a voting module
 
 ```
 docker build -t full-node .
-docker run -p 6644:6644 full-node --alice
+docker run -p 9944:9944 full-node --alice
 ```
 
 See the Dockerfile for more details.
