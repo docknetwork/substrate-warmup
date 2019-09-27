@@ -16,7 +16,7 @@ pub use runtime::{
 
 // The following is only made public only when compiling with feature = "std".
 #[cfg(feature = "std")]
-pub use runtime::{api, opaque, AccountId, RuntimeApi};
+pub use runtime::{api, opaque, AccountId, Runtime, RuntimeApi};
 
 #[cfg(test)]
 mod tests {

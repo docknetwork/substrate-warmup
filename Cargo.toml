@@ -43,4 +43,5 @@ members = [
     "modules/multi-token",
     "modules/voting",
     "modules/erc20",
+    "client",
 ]
