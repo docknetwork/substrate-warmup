@@ -1,4 +1,5 @@
 use codec::{Codec, Decode, Encode};
+use core::convert::TryInto;
 use rstd::prelude::*;
 use sr_primitives::traits::{CheckedAdd, CheckedSub, Member, SimpleArithmetic};
 use support::{
@@ -102,13 +103,47 @@ decl_storage! {
     trait Store for Module<T: Trait> as Erc20 {
         // token id nonce for storing the next token id available for token initialization
         // inspired by the AssetId in the SRML assets module
-        TokenId get(token_id): u32;
+        TokenId get(token_id)
+            build(|config: &GenesisConfig<T>| {
+                let len: usize = config.initial_tokens.len();
+                let next_id: u32 = len.try_into().expect("number of tokens was too large");
+                next_id
+            })
+            : u32;
         // details of the token corresponding to a token id
-        Tokens get(token_details): map u32 => Erc20Token<T::TokenBalance>;
+        Tokens get(token_details)
+            build(|config: &GenesisConfig<T>| -> Vec<_> {
+                config
+                    .initial_tokens
+                    .iter()
+                    .cloned()
+                    .enumerate()
+                    .map(|(id, (token_details, _account))| {
+                        (id.try_into().expect("too many tokens"), token_details)
+                    })
+                    .collect()
+            })
+            : map u32 => Erc20Token<T::TokenBalance>;
         // balances mapping for an account and token
-        BalanceOf get(balance_of): map (u32, T::AccountId) => T::TokenBalance;
+        BalanceOf get(balance_of)
+            build(|config: &GenesisConfig<T>| -> Vec<_> {
+                config
+                    .initial_tokens
+                    .iter()
+                    .cloned()
+                    .enumerate()
+                    .map(|(id, (token_details, account))| {
+                        ((id.try_into().expect("too many tokens"), account), token_details.total_supply)
+                    })
+                    .collect()
+            })
+            : map (u32, T::AccountId) => T::TokenBalance;
         // allowance for an account and token
         Allowance get(allowance): map (u32, T::AccountId, T::AccountId) => T::TokenBalance;
+    }
+
+    add_extra_genesis {
+        config(initial_tokens): Vec<(Erc20Token<T::TokenBalance>, T::AccountId)>;
     }
 }
 
@@ -222,13 +257,24 @@ mod test {
     const B: u64 = 1;
     const C: u64 = 2;
 
-    // This function basically just builds a genesis storage key/value store according to
-    // our desired mockup.
     fn new_test_ext() -> runtime_io::TestExternalities<Blake2Hasher> {
         system::GenesisConfig::default()
             .build_storage::<Test>()
             .unwrap()
             .into()
+    }
+
+    /// create test env with some tokens pre_initend by the chainspec
+    fn pre_alloc_ext(
+        initial_tokens: Vec<(Erc20Token<u128>, u64)>,
+    ) -> runtime_io::TestExternalities<Blake2Hasher> {
+        GenesisConfig::<Test> {
+            initial_tokens,
+            ..Default::default()
+        }
+        .build_storage()
+        .unwrap()
+        .into()
     }
 
     /// send tokens from A to B
@@ -383,6 +429,104 @@ mod test {
             assert_eq!(TemplateModule::balance_of((1, A)), 0);
             assert_eq!(TemplateModule::balance_of((1, B)), 0);
             assert_eq!(TemplateModule::balance_of((1, C)), 0);
+        });
+    }
+
+    #[test]
+    fn genesis_config() {
+        let conf = vec![(
+            Erc20Token {
+                name: b"token 0".to_vec(),
+                ticker: b"token ticker 0".to_vec(),
+                total_supply: 10,
+            },
+            A,
+        )];
+        with_externalities(&mut pre_alloc_ext(conf), || {
+            assert_eq!(TemplateModule::balance_of((0, A)), 10);
+            assert_eq!(TemplateModule::balance_of((1, A)), 0);
+            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 20)
+                .unwrap();
+            assert_eq!(TemplateModule::balance_of((0, A)), 10);
+            assert_eq!(TemplateModule::balance_of((1, A)), 20);
+        });
+    }
+
+    #[test]
+    fn genesis_config_multi() {
+        let conf = vec![
+            (
+                Erc20Token {
+                    name: b"token 0".to_vec(),
+                    ticker: b"token ticker 0".to_vec(),
+                    total_supply: 10,
+                },
+                A,
+            ),
+            (
+                Erc20Token {
+                    name: b"token 1".to_vec(),
+                    ticker: b"token ticker 1".to_vec(),
+                    total_supply: 10,
+                },
+                B,
+            ),
+        ];
+        with_externalities(&mut pre_alloc_ext(conf), || {
+            assert_eq!(TemplateModule::balance_of((0, A)), 10);
+            assert_eq!(TemplateModule::balance_of((0, B)), 0);
+            assert_eq!(TemplateModule::balance_of((1, A)), 0);
+            assert_eq!(TemplateModule::balance_of((1, B)), 10);
+            assert_eq!(TemplateModule::balance_of((2, A)), 0);
+            assert_eq!(TemplateModule::balance_of((2, B)), 0);
+        });
+    }
+
+    #[test]
+    fn genesis_config_token_details() {
+        let conf = vec![
+            (
+                Erc20Token {
+                    name: b"token 0".to_vec(),
+                    ticker: b"token ticker 0".to_vec(),
+                    total_supply: 10,
+                },
+                A,
+            ),
+            (
+                Erc20Token {
+                    name: b"token 1".to_vec(),
+                    ticker: b"token ticker 1".to_vec(),
+                    total_supply: 10,
+                },
+                B,
+            ),
+        ];
+        with_externalities(&mut pre_alloc_ext(conf), || {
+            assert_eq!(
+                TemplateModule::token_details(0),
+                Erc20Token {
+                    name: b"token 0".to_vec(),
+                    ticker: b"token ticker 0".to_vec(),
+                    total_supply: 10,
+                }
+            );
+            assert_eq!(
+                TemplateModule::token_details(1),
+                Erc20Token {
+                    name: b"token 1".to_vec(),
+                    ticker: b"token ticker 1".to_vec(),
+                    total_supply: 10,
+                }
+            );
+            assert_eq!(
+                TemplateModule::token_details(2),
+                Erc20Token {
+                    name: b"".to_vec(),
+                    ticker: b"".to_vec(),
+                    total_supply: 0,
+                }
+            );
         });
     }
 }
