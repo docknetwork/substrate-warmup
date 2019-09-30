@@ -1,6 +1,9 @@
 pub mod method;
 pub mod serde_as_scale;
 
+#[cfg(test)]
+mod testnode;
+
 use futures::{future::Future, sink::Sink, stream::Stream};
 use jrpc::{Id, Request, Response, V2_0};
 use method::Method;
@@ -75,44 +78,7 @@ fn get_sumpm<Return: DeserializeOwned>(
 mod tests {
     use super::*;
     use method::StateGetMetadata;
-
-    struct RunningFullNode {
-        url: String,
-    }
-
-    impl RunningFullNode {
-        fn new() -> Self {
-            let ret = Self {
-                url: "ws://127.0.0.1:9944".to_string(),
-            };
-
-            // check if local full-node is running
-            ret.remote_call::<StateGetMetadata>([]).unwrap();
-
-            // yep, it's running
-            ret
-        }
-
-        fn remote_call<M: Method>(&self, arg: M::Args) -> Result<M::Return, &'static str> {
-            remote_call::<M>(&self.url, arg)
-        }
-    }
-
-    impl Drop for RunningFullNode {
-        fn drop(&mut self) {
-            match self.remote_call::<StateGetMetadata>([]) {
-                Err(err) => {
-                    eprintln!("Full node stopped functioning during a test. Odd.. It was working");
-                    eprintln!("when the test started. A call to the StateGetMetadata method");
-                    eprintln!("resulted in the error: \"{}\"", err);
-                    if !std::thread::panicking() {
-                        panic!()
-                    }
-                }
-                Ok(_) => {}
-            }
-        }
-    }
+    use testnode::RunningFullNode;
 
     #[test]
     fn g_metadata() {
