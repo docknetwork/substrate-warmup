@@ -10,8 +10,8 @@ mod runtime;
 // The following exports only exists when compiling with feature = "std".
 #[cfg(feature = "std")]
 pub use runtime::{
-    native_version, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig, IndicesConfig,
-    MultiTokenConfig, SudoConfig, SystemConfig, TokenType, WASM_BINARY,
+    native_version, BabeConfig, BalancesConfig, Erc20Config, GenesisConfig, GrandpaConfig,
+    IndicesConfig, SudoConfig, SystemConfig, WASM_BINARY,
 };
 
 // The following is only made public only when compiling with feature = "std".
@@ -36,7 +36,7 @@ mod tests {
             indices: None,
             sudo: None,
             system: None,
-            multi_token: None,
+            erc20: None,
         }
         .build_storage()
         .unwrap()

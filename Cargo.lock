@@ -2063,7 +2063,7 @@ dependencies = [
 name = "node-template-runtime"
 version = "2.0.0"
 dependencies = [
- "multi-token 0.1.0",
+ "erc20 0.1.0",
  "parity-scale-codec 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "safe-mix 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.100 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -4070,6 +4070,7 @@ dependencies = [
 name = "substrate-warmup-chaingen"
 version = "0.1.0"
 dependencies = [
+ "erc20 0.1.0",
  "node-template-runtime 2.0.0",
  "paw 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "structopt 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -1,6 +1,8 @@
 use codec::{Codec, Decode, Encode};
 use core::convert::TryInto;
 use rstd::prelude::*;
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 use sr_primitives::traits::{CheckedAdd, CheckedSub, Member, SimpleArithmetic};
 use support::{
     decl_event, decl_module, decl_storage, dispatch::Result, ensure, Parameter, StorageMap,
@@ -17,10 +19,11 @@ pub trait Trait: system::Trait {
 
 // struct to store the token details
 #[derive(Encode, Decode, Default, Clone, PartialEq, Debug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Erc20Token<U> {
-    name: Vec<u8>,
-    ticker: Vec<u8>,
-    total_supply: U,
+    pub name: Vec<u8>,
+    pub ticker: Vec<u8>,
+    pub total_supply: U,
 }
 
 // public interface for this runtime module
