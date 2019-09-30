@@ -30,4 +30,5 @@ members = [
     "runtime",
     "modules/multi-token",
     "modules/voting",
+    "modules/erc20",
 ]
