@@ -6,7 +6,7 @@ use support::{
     decl_event, decl_module, decl_storage, dispatch::Result, ensure, Parameter, StorageMap,
     StorageValue,
 };
-use system::{self, ensure_signed};
+use system::{self, ensure_root, ensure_signed};
 
 // the module trait
 // contains type definitions
@@ -29,13 +29,15 @@ decl_module! {
         // initialize the default event for this module
         fn deposit_event() = default;
 
-        // initializes a new token
-        // generates an integer token_id so that all tokens are unique
-        // takes a name, ticker, total supply for the token
-        // makes the initiating account the owner of the token
-        // the balance of the owner is set to total supply
-        fn init(origin, name: Vec<u8>, ticker: Vec<u8>, total_supply: T::TokenBalance) -> Result {
-            let sender = ensure_signed(origin)?;
+        /// initializes a new token
+        /// generates an integer token_id so that all tokens are unique
+        /// takes a name, ticker, total supply for the token
+        /// makes the beneficiary account the owner of the token
+        /// the balance of the owner is set to total supply
+        ///
+        /// Only root can call this function
+        fn init(origin, beneficiary: T::AccountId, name: Vec<u8>, ticker: Vec<u8>, total_supply: T::TokenBalance) -> Result {
+            ensure_root(origin)?;
 
             // checking max size for name and ticker
             // byte arrays (vecs) with no max size should be avoided
@@ -53,7 +55,7 @@ decl_module! {
             };
 
             <Tokens<T>>::insert(token_id, token);
-            <BalanceOf<T>>::insert((token_id, sender), total_supply);
+            <BalanceOf<T>>::insert((token_id, beneficiary), total_supply);
 
             Ok(())
         }
@@ -264,17 +266,14 @@ mod test {
             .into()
     }
 
-    /// create test env with some tokens pre_initend by the chainspec
+    /// create test env with some tokens pre-inited by the chainspec
     fn pre_alloc_ext(
         initial_tokens: Vec<(Erc20Token<u128>, u64)>,
     ) -> runtime_io::TestExternalities<Blake2Hasher> {
-        GenesisConfig::<Test> {
-            initial_tokens,
-            ..Default::default()
-        }
-        .build_storage()
-        .unwrap()
-        .into()
+        GenesisConfig::<Test> { initial_tokens }
+            .build_storage()
+            .unwrap()
+            .into()
     }
 
     /// send tokens from A to B
@@ -282,8 +281,7 @@ mod test {
     fn xfer() {
         with_externalities(&mut new_test_ext(), || {
             // create a new token as A
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
 
             // transfer to B
             TemplateModule::transfer(Origin::signed(A), 0, B, 4).unwrap();
@@ -301,12 +299,10 @@ mod test {
         with_externalities(&mut new_test_ext(), || {
             assert_eq!(TemplateModule::balance_of((0, A)), 0);
             assert_eq!(TemplateModule::balance_of((1, A)), 0);
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
             assert_eq!(TemplateModule::balance_of((1, A)), 0);
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
             assert_eq!(TemplateModule::balance_of((1, A)), 10);
         });
@@ -315,8 +311,7 @@ mod test {
     #[test]
     fn transfer_pong() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
             assert_eq!(TemplateModule::balance_of((0, B)), 0);
             TemplateModule::transfer(Origin::signed(A), 0, B, 1).unwrap();
@@ -346,8 +341,7 @@ mod test {
     #[test]
     fn transfer_none() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, B, 0).unwrap();
         });
     }
@@ -355,8 +349,7 @@ mod test {
     #[test]
     fn transfer_twice() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, B, 5).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, B, 5).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, B, 5).unwrap_err();
@@ -367,7 +360,8 @@ mod test {
     fn transfer_overflow() {
         with_externalities(&mut new_test_ext(), || {
             TemplateModule::init(
-                Origin::signed(A),
+                Origin::ROOT,
+                A,
                 b"Trash".to_vec(),
                 b"TRS".to_vec(),
                 u128::max_value(),
@@ -382,8 +376,7 @@ mod test {
     #[test]
     fn transfer_too_much() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, B, 11).unwrap_err();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
             assert_eq!(TemplateModule::balance_of((0, B)), 0);
@@ -393,8 +386,7 @@ mod test {
     #[test]
     fn transfer_to_self() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, A, 10).unwrap();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
         });
@@ -403,8 +395,7 @@ mod test {
     #[test]
     fn transfer_too_much_to_self() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, A, 11).unwrap_err();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
         });
@@ -413,8 +404,7 @@ mod test {
     #[test]
     fn transfer_zero_to_self() {
         with_externalities(&mut new_test_ext(), || {
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 10)
-                .unwrap();
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, A, 0).unwrap();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
         });
@@ -445,8 +435,7 @@ mod test {
         with_externalities(&mut pre_alloc_ext(conf), || {
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
             assert_eq!(TemplateModule::balance_of((1, A)), 0);
-            TemplateModule::init(Origin::signed(A), b"Trash".to_vec(), b"TRS".to_vec(), 20)
-                .unwrap();
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 20).unwrap();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
             assert_eq!(TemplateModule::balance_of((1, A)), 20);
         });
@@ -527,6 +516,27 @@ mod test {
                     total_supply: 0,
                 }
             );
+        });
+    }
+
+    #[test]
+    fn must_root() {
+        with_externalities(&mut new_test_ext(), || {
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
+            TemplateModule::init(Origin::signed(A), A, b"Trash".to_vec(), b"TRS".to_vec(), 10)
+                .unwrap_err();
+        });
+    }
+
+    #[test]
+    fn large_ticker_or_name() {
+        let aa = b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        assert_eq!(aa[..64].to_vec().len(), 64);
+        with_externalities(&mut new_test_ext(), || {
+            TemplateModule::init(Origin::ROOT, A, aa[..64].to_vec(), b"".to_vec(), 10).unwrap();
+            TemplateModule::init(Origin::ROOT, A, b"".to_vec(), aa[..32].to_vec(), 10).unwrap();
+            TemplateModule::init(Origin::ROOT, A, aa[..65].to_vec(), b"".to_vec(), 10).unwrap_err();
+            TemplateModule::init(Origin::ROOT, A, b"".to_vec(), aa[..33].to_vec(), 10).unwrap_err();
         });
     }
 }
