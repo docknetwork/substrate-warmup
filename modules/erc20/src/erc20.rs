@@ -100,6 +100,15 @@ decl_module! {
             Self::deposit_event(RawEvent::Approval(token_id, from.clone(), to.clone(), value));
             Self::_transfer(token_id, from, to, value)
         }
+
+        // permanently discard, throw away tokens
+        pub fn burn(origin, token_id: u32, value: T::TokenBalance) -> Result {
+            let account = ensure_signed(origin)?;
+            let key = (token_id, account);
+            let bal = <BalanceOf<T>>::get(&key).checked_sub(&value).ok_or("Not enough balance.")?;
+            <BalanceOf<T>>::insert(key, bal);
+            Ok(())
+        }
     }
 }
 
@@ -563,7 +572,71 @@ mod test {
 
     #[test]
     fn burn() {
-        unimplemented!();
+        let conf = vec![(
+            Erc20Token {
+                name: b"token 0".to_vec(),
+                ticker: b"token ticker 0".to_vec(),
+                total_supply: 10,
+            },
+            A,
+        )];
+        with_externalities(&mut pre_alloc_ext(conf), || {
+            assert_eq!(TemplateModule::balance_of((0, A)), 10);
+            TemplateModule::burn(Origin::signed(A), 0, 5).unwrap();
+            assert_eq!(TemplateModule::balance_of((0, A)), 5);
+            TemplateModule::burn(Origin::signed(A), 0, 5).unwrap();
+            assert_eq!(TemplateModule::balance_of((0, A)), 0);
+        });
+    }
+
+    #[test]
+    fn burn_too_much() {
+        let conf = vec![(
+            Erc20Token {
+                name: b"token 0".to_vec(),
+                ticker: b"token ticker 0".to_vec(),
+                total_supply: 10,
+            },
+            A,
+        )];
+        with_externalities(&mut pre_alloc_ext(conf), || {
+            TemplateModule::burn(Origin::signed(A), 0, 11).unwrap_err();
+            assert_eq!(TemplateModule::balance_of((0, A)), 10);
+        });
+    }
+
+    #[test]
+    fn burn_other_token() {
+        let conf = vec![(
+            Erc20Token {
+                name: b"token 0".to_vec(),
+                ticker: b"token ticker 0".to_vec(),
+                total_supply: 10,
+            },
+            A,
+        )];
+        with_externalities(&mut pre_alloc_ext(conf), || {
+            TemplateModule::burn(Origin::signed(A), 1, 1).unwrap_err();
+            TemplateModule::burn(Origin::signed(A), 1, 0).unwrap();
+            assert_eq!(TemplateModule::balance_of((0, A)), 10);
+            assert_eq!(TemplateModule::balance_of((1, A)), 0);
+        });
+    }
+
+    #[test]
+    fn burn_zero() {
+        let conf = vec![(
+            Erc20Token {
+                name: b"token 0".to_vec(),
+                ticker: b"token ticker 0".to_vec(),
+                total_supply: 10,
+            },
+            A,
+        )];
+        with_externalities(&mut pre_alloc_ext(conf), || {
+            TemplateModule::burn(Origin::signed(A), 0, 0).unwrap();
+            assert_eq!(TemplateModule::balance_of((0, A)), 10);
+        });
     }
 
     #[test]
