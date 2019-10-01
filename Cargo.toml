@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 node-template-runtime = { path = "runtime" }
+erc20 = { path = "modules/erc20" }
 paw = "1.0.0"
 structopt = { version = "0.3.2", features = ["paw"] }
 
@@ -30,4 +31,5 @@ members = [
     "runtime",
     "modules/multi-token",
     "modules/voting",
+    "modules/erc20",
 ]

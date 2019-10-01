@@ -1,7 +1,8 @@
 use super::Chain;
+use erc20::Erc20Token;
 use node_template_runtime::{
-    AccountId, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig, IndicesConfig,
-    MultiTokenConfig, SudoConfig, SystemConfig, TokenType, WASM_BINARY,
+    AccountId, BabeConfig, BalancesConfig, Erc20Config, GenesisConfig, GrandpaConfig,
+    IndicesConfig, SudoConfig, SystemConfig, WASM_BINARY,
 };
 use substrate_consensus_babe_primitives::AuthorityId as BabeId;
 use substrate_finality_grandpa_primitives::AuthorityId as GrandpaId;
@@ -42,7 +43,12 @@ pub(super) fn generate(chain: Chain) -> substrate_service::ChainSpec<GenesisConf
                     0xf4, 0x59, 0x4e, 0x04, 0xc8, 0xd6, 0x36, 0x02, 0x44, 0x5a, 0x00, 0x0c, 0x7d,
                     0xe4, 0x82, 0xeb, 0xe4, 0x2d, 0x76,
                 ]);
-                testnet_genesis(vec![bddap_keys], bddap_sudo, vec![])
+                let bddap_treasury = Public::from_slice(&[
+                    0xb2, 0xae, 0x55, 0x75, 0xda, 0x1f, 0xdc, 0x94, 0x82, 0x13, 0x15, 0x9e, 0x76,
+                    0xf4, 0x59, 0x4e, 0x04, 0xc8, 0xd6, 0x36, 0x02, 0x44, 0x5a, 0x00, 0x0c, 0x7d,
+                    0xe4, 0x82, 0xeb, 0xe4, 0x2d, 0x76,
+                ]);
+                testnet_genesis(vec![bddap_keys], bddap_sudo, bddap_treasury)
             },
             vec![],
             None,
@@ -57,7 +63,7 @@ pub(super) fn generate(chain: Chain) -> substrate_service::ChainSpec<GenesisConf
                 testnet_genesis(
                     vec![get_authority_keys_from_seed("Alice")],
                     get_from_seed::<AccountId>("Alice"),
-                    vec![get_from_seed::<AccountId>("Alice")],
+                    get_from_seed::<AccountId>("Alice"),
                 )
             },
             vec![],
@@ -72,9 +78,9 @@ pub(super) fn generate(chain: Chain) -> substrate_service::ChainSpec<GenesisConf
 fn testnet_genesis(
     initial_authorities: Vec<(AccountId, AccountId, GrandpaId, BabeId)>,
     root_key: AccountId,
-    endowed_accounts: Vec<AccountId>,
+    treasury: AccountId,
 ) -> GenesisConfig {
-    const ENDOWMENT: u128 = 1 << 60;
+    const ENDOWMENT: u128 = u128::max_value();
 
     GenesisConfig {
         system: Some(SystemConfig {
@@ -82,14 +88,10 @@ fn testnet_genesis(
             changes_trie_config: Default::default(),
         }),
         indices: Some(IndicesConfig {
-            ids: endowed_accounts.clone(),
+            ids: vec![treasury.clone()],
         }),
         balances: Some(BalancesConfig {
-            balances: endowed_accounts
-                .iter()
-                .cloned()
-                .map(|k| (k, ENDOWMENT))
-                .collect(),
+            balances: vec![(treasury.clone(), ENDOWMENT)],
             vesting: vec![],
         }),
         sudo: Some(SudoConfig { key: root_key }),
@@ -105,20 +107,25 @@ fn testnet_genesis(
                 .map(|x| (x.2.clone(), 1))
                 .collect(),
         }),
-        multi_token: Some(MultiTokenConfig {
-            balances: {
-                let mut ret = Vec::new();
-                for token in &[TokenType::PDock, TokenType::PStable] {
-                    ret.extend(
-                        endowed_accounts
-                            .iter()
-                            .cloned()
-                            .map(|account| ((*token, account), ENDOWMENT))
-                            .collect::<Vec<_>>(),
-                    );
-                }
-                ret
-            },
+        erc20: Some(Erc20Config {
+            initial_tokens: vec![
+                (
+                    Erc20Token {
+                        name: b"PSTABLE1".to_vec(),
+                        ticker: b"PSTABLE1".to_vec(),
+                        total_supply: ENDOWMENT,
+                    },
+                    treasury.clone(),
+                ),
+                (
+                    Erc20Token {
+                        name: b"PSTABLE2".to_vec(),
+                        ticker: b"PSTABLE2".to_vec(),
+                        total_supply: ENDOWMENT,
+                    },
+                    treasury.clone(),
+                ),
+            ],
         }),
     }
 }
