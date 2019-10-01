@@ -560,4 +560,19 @@ mod test {
         let b: Erc20Token<u128> = codec::DecodeAll::decode_all(&v).unwrap();
         assert_eq!(a, b);
     }
+
+    #[test]
+    fn burn() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn approve_transfer_from() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn events() {
+        unimplemented!();
+    }
 }
