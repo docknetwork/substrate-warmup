@@ -1,4 +1,9 @@
 {
+  "Erc20Token": {
+    "name": "Text",
+    "ticker": "Text",
+    "total_supply": "u128"
+  },
   "TokenBalance": "u128",
   "Discriminant": "bool",
   "VoteStage": {

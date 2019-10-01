@@ -542,4 +542,22 @@ mod test {
             TemplateModule::init(Origin::ROOT, A, b"".to_vec(), aa[..33].to_vec(), 10).unwrap_err();
         });
     }
+
+    #[test]
+    /// check encode is proper inverse of decode
+    fn encode_token_details() {
+        let a = Erc20Token::<u128> {
+            name: b"a".to_vec(),
+            ticker: b"TICKER".to_vec(),
+            total_supply: u128::max_value(),
+        };
+        let v: Vec<u8> = a.encode();
+        let expected: &[u8] = &[
+            4, 97, 24, 84, 73, 67, 75, 69, 82, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+            255, 255, 255, 255, 255, 255,
+        ];
+        assert_eq!(&v, &expected);
+        let b: Erc20Token<u128> = codec::DecodeAll::decode_all(&v).unwrap();
+        assert_eq!(a, b);
+    }
 }
