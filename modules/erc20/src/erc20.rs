@@ -640,11 +640,13 @@ mod test {
     }
 
     #[test]
+    #[ignore] // not yet implemented
     fn approve_transfer_from() {
         unimplemented!();
     }
 
     #[test]
+    #[ignore] // not yet implemented
     fn events() {
         unimplemented!();
     }
