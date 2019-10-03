@@ -31,6 +31,7 @@ cargo +nightly install --git https://github.com/alexcrichton/wasm-gc --force
 
 # substrate
 git clone https://github.com/paritytech/substrate.git
+(cd substrate; git checkout 870b976bec729aaf26cc237df9fd764b8f7b9d7e) # our current pinned version
 cargo install --path substrate --force
 ```
 
@@ -44,11 +45,11 @@ mkdir -p tmp
 
 # create a chainspec
 cargo run --release -- ved > tmp/chainspec.json
-#         ^^^^^^^^^    ^^^ ^^^^^^^^^^^^^^^^^^^^
-#             |         |         |
-#             |         | Dump the chainspec into a file which we'll use in the next step.
+#         ^^^^^^^^^    ^^^ ^^^^^^^^^^^^^^^^^^^^ Dump the chainspec into a file which we'll use in
+#             |         |                       the next step.
 #             |         |
-#             | Specify the dev chain.
+#             | Specify the dev chain. Run `cargo run --release -- help`
+#             | for a full list of options.
 #             |
 # The runtime is executed purley in Wasm. The naitive runtime is disabled for this chain.
 # Wasmi sometimes can't keep up with block production unless compiled with optimizations.
@@ -56,9 +57,8 @@ cargo run --release -- ved > tmp/chainspec.json
 
 # run created chainspec using substrate
 substrate --chain ./tmp/chainspec.json --alice --base-path ./tmp
-#         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^ ^^^^^^^^^^^^^^^^^
-#             |                           |            |
-#             |                           | Store chain data in a temporary directory.
+#         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^ ^^^^^^^^^^^^^^^^^ Store chain data in a
+#             |                           |                      temporary directory.
 #             |                           |
 #             | Use the publicly known keypair, 'Alice', to produce blocks.
 #             |
@@ -67,7 +67,7 @@ substrate --chain ./tmp/chainspec.json --alice --base-path ./tmp
 
 # Using the polkadot js UI
 
-Once the dev chain is running, you can interact with it via browser.
+Once the dev chain is running, natively or within docker, you can interact with it via browser.
 
 Go to https://polkadot.js.org/apps/#/settings and set "remote endpoint" to your locally running node 127.0.0.1.
 
@@ -80,6 +80,6 @@ using "//Alice" as the derivation path on an sr25519 key.
 
 Once the key is loaded, you should see that Alice has a large account balance.
 
-To try out the multi-token module, go to https://polkadot.js.org/apps/#/extrinsics. You may need another dummy
-account if you want to send PDock and PStable around. Unter the multiToken module in the extrinsics page, find
-the transfer() function which will send tokens. Set `token_id` to true for PDock, false for PStable.
+To try out the erc20 module, go to https://polkadot.js.org/apps/#/extrinsics. You may need another dummy
+account if you want to send PSTABLE1 and PSTABLE2 around. Under the erc20 module in the extrinsics page, find
+the transfer() function which will send tokens. Set `token_id` to 0 for PSTABLE1, 1 for PSTABLE2.
