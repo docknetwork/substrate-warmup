@@ -120,6 +120,10 @@ impl<G> ChainSpec<G> {
             genesis: GenesisSource(genesis),
         }
     }
+
+    pub fn protocol_id(&self) -> Option<&str> {
+        self.spec.protocol_id.as_ref().map(|x| &**x)
+    }
 }
 
 impl<G: RuntimeGenesis> ChainSpec<G> {

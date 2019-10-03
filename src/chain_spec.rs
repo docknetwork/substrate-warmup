@@ -15,7 +15,7 @@ use substrate_primitives::{Pair, Public};
 /// generate a substrate chainspec
 pub enum Chain {
     /// Outputs the chainspec for a shared testnet with a custom validator, root, and treasury
-    Ent {
+    Custom {
         #[structopt(parse(try_from_str = parse_pubkey))]
         validator_grandpa: GrandpaId,
         #[structopt(parse(try_from_str = parse_pubkey))]
@@ -33,24 +33,31 @@ impl Chain {
     /// Get an actual chain config from one of the alternatives.
     pub fn generate(self) -> ChainSpec<GenesisConfig> {
         match self {
-            Chain::Ent {
+            Chain::Custom {
                 validator_grandpa,
                 validator_babe,
                 root_key,
                 treasury,
             } => ChainSpec::from_genesis(
-                "Ent Shared Dev Testnet",
-                "dock-ent",
-                testnet_genesis((validator_grandpa, validator_babe), root_key, treasury),
+                "Substrate Warmup Custom Testnet",
+                "substrate-warmup-custom",
+                testnet_genesis(
+                    (validator_grandpa.clone(), validator_babe.clone()),
+                    root_key.clone(),
+                    treasury.clone(),
+                ),
                 vec![],
                 None,
-                Some("dock-substrate-warmup-ent"),
+                Some(&format!(
+                    "substrate-warmup-custom-{}-{}-{}-{}",
+                    validator_grandpa, validator_babe, root_key, treasury
+                )),
                 None,
                 None,
             ),
             Chain::Ved => ChainSpec::from_genesis(
-                "Ved Local Dev Testnet",
-                "dock-ved",
+                "Substrate Warmup Local Dev Testnet",
+                "substrate-warmup-local",
                 testnet_genesis(
                     (
                         get_from_seed::<GrandpaId>("Alice"),
@@ -187,7 +194,7 @@ mod tests {
         let valid_pk = "0x6e4e511be3eae0696f542e7c05f99e5f5e7b19ce311fc8ef7c2139e0505c305c";
 
         for chain in &[
-            Chain::Ent {
+            Chain::Custom {
                 validator_grandpa: parse_pubkey::<GrandpaId>(valid_pk).unwrap(),
                 validator_babe: parse_pubkey::<BabeId>(valid_pk).unwrap(),
                 root_key: parse_pubkey::<AccountId>(valid_pk).unwrap(),
@@ -198,5 +205,27 @@ mod tests {
             chain.clone().generate().into_json(true).unwrap();
             chain.clone().generate().into_json(false).unwrap();
         }
+    }
+
+    #[test]
+    fn t_generate_protocol_id() {
+        let valid_pk = "0x6e4e511be3eae0696f542e7c05f99e5f5e7b19ce311fc8ef7c2139e0505c305c";
+
+        let genesis = Chain::Custom {
+            validator_grandpa: parse_pubkey::<GrandpaId>(valid_pk).unwrap(),
+            validator_babe: parse_pubkey::<BabeId>(valid_pk).unwrap(),
+            root_key: parse_pubkey::<AccountId>(valid_pk).unwrap(),
+            treasury: parse_pubkey::<AccountId>(valid_pk).unwrap(),
+        }
+        .generate();
+        let prot_id = genesis.protocol_id().unwrap();
+        assert_eq!(
+            prot_id,
+            "substrate-warmup-custom-\
+             5EZLPYKPLdfHutUAxx7hYVqwxmtjcw6MrtNygajayUDQzoSM-\
+             5EZLPYKPLdfHutUAxx7hYVqwxmtjcw6MrtNygajayUDQzoSM-\
+             5EZLPYKPLdfHutUAxx7hYVqwxmtjcw6MrtNygajayUDQzoSM-\
+             5EZLPYKPLdfHutUAxx7hYVqwxmtjcw6MrtNygajayUDQzoSM"
+        );
     }
 }
