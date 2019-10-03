@@ -1,3 +1,5 @@
-# ignore everything except the prebuilt chainspecs
-**
-!./chainspecs/*.json
+**/target/
+**/*.rs.bk
+tmp
+.git
+Dockerfile

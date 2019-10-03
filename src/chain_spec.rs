@@ -1,82 +1,83 @@
-use super::Chain;
+use crate::serializable_genesis::ChainSpec;
 use erc20::Erc20Token;
 use node_template_runtime::{
     AccountId, BabeConfig, BalancesConfig, Erc20Config, GenesisConfig, GrandpaConfig,
     IndicesConfig, SudoConfig, SystemConfig, WASM_BINARY,
 };
+use serde::{Deserialize, Serialize};
 use substrate_consensus_babe_primitives::AuthorityId as BabeId;
 use substrate_finality_grandpa_primitives::AuthorityId as GrandpaId;
 use substrate_primitives::{Pair, Public};
-use substrate_service;
 
-/// Get an actual chain config from one of the alternatives.
-pub(super) fn generate(chain: Chain) -> substrate_service::ChainSpec<GenesisConfig> {
-    match chain {
-        Chain::Ent => substrate_service::ChainSpec::from_genesis(
-            "Ent Shared Dev Testnet",
-            "dock-ent",
-            || {
-                let bddap_keys: (AccountId, AccountId, GrandpaId, BabeId) = (
-                    Public::from_slice(&[
-                        0xe6, 0x9f, 0x08, 0x8a, 0xa0, 0x18, 0xf6, 0xe9, 0xd7, 0x48, 0x2d, 0x83,
-                        0x1f, 0x5d, 0x0b, 0x04, 0xf9, 0xe7, 0xdb, 0xf6, 0xca, 0xcf, 0x75, 0xf3,
-                        0xdb, 0x5b, 0xd7, 0x5c, 0xa8, 0x58, 0xbb, 0x0a,
-                    ]),
-                    Public::from_slice(&[
-                        0xb2, 0xae, 0x55, 0x75, 0xda, 0x1f, 0xdc, 0x94, 0x82, 0x13, 0x15, 0x9e,
-                        0x76, 0xf4, 0x59, 0x4e, 0x04, 0xc8, 0xd6, 0x36, 0x02, 0x44, 0x5a, 0x00,
-                        0x0c, 0x7d, 0xe4, 0x82, 0xeb, 0xe4, 0x2d, 0x76,
-                    ]),
-                    Public::from_slice(&[
-                        0xd7, 0x24, 0x7c, 0x76, 0xce, 0x63, 0x0a, 0x91, 0xb3, 0x62, 0xe6, 0xec,
-                        0x78, 0x8e, 0xe6, 0x1c, 0xc7, 0x35, 0xb1, 0xae, 0xa7, 0xca, 0x85, 0x02,
-                        0xc8, 0x68, 0xba, 0xe7, 0xf6, 0x52, 0x00, 0x2b,
-                    ]),
-                    Public::from_slice(&[
-                        0xb2, 0xae, 0x55, 0x75, 0xda, 0x1f, 0xdc, 0x94, 0x82, 0x13, 0x15, 0x9e,
-                        0x76, 0xf4, 0x59, 0x4e, 0x04, 0xc8, 0xd6, 0x36, 0x02, 0x44, 0x5a, 0x00,
-                        0x0c, 0x7d, 0xe4, 0x82, 0xeb, 0xe4, 0x2d, 0x76,
-                    ]),
-                );
-                let bddap_sudo = Public::from_slice(&[
-                    0xb2, 0xae, 0x55, 0x75, 0xda, 0x1f, 0xdc, 0x94, 0x82, 0x13, 0x15, 0x9e, 0x76,
-                    0xf4, 0x59, 0x4e, 0x04, 0xc8, 0xd6, 0x36, 0x02, 0x44, 0x5a, 0x00, 0x0c, 0x7d,
-                    0xe4, 0x82, 0xeb, 0xe4, 0x2d, 0x76,
-                ]);
-                let bddap_treasury = Public::from_slice(&[
-                    0xb2, 0xae, 0x55, 0x75, 0xda, 0x1f, 0xdc, 0x94, 0x82, 0x13, 0x15, 0x9e, 0x76,
-                    0xf4, 0x59, 0x4e, 0x04, 0xc8, 0xd6, 0x36, 0x02, 0x44, 0x5a, 0x00, 0x0c, 0x7d,
-                    0xe4, 0x82, 0xeb, 0xe4, 0x2d, 0x76,
-                ]);
-                testnet_genesis(vec![bddap_keys], bddap_sudo, bddap_treasury)
-            },
-            vec![],
-            None,
-            Some("dock-substrate-warmup-ent"),
-            None,
-            None,
-        ),
-        Chain::Ved => substrate_service::ChainSpec::from_genesis(
-            "Ved Local Dev Testnet",
-            "dock-ved",
-            || {
+#[derive(
+    structopt::StructOpt, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Serialize, Deserialize,
+)]
+/// generate a substrate chainspec
+pub enum Chain {
+    /// Outputs the chainspec for a shared testnet with a custom validator, root, and treasury
+    Custom {
+        #[structopt(parse(try_from_str = parse_pubkey))]
+        validator_grandpa: GrandpaId,
+        #[structopt(parse(try_from_str = parse_pubkey))]
+        validator_babe: BabeId,
+        #[structopt(parse(try_from_str = parse_pubkey))]
+        root_key: AccountId,
+        #[structopt(parse(try_from_str = parse_pubkey))]
+        treasury: AccountId,
+    },
+    /// Outputs the chainspec for a testnet with Alice as validator, root, and treasury
+    Ved,
+}
+
+impl Chain {
+    /// Get an actual chain config from one of the alternatives.
+    pub fn generate(self) -> ChainSpec<GenesisConfig> {
+        match self {
+            Chain::Custom {
+                validator_grandpa,
+                validator_babe,
+                root_key,
+                treasury,
+            } => ChainSpec::from_genesis(
+                "Substrate Warmup Custom Testnet",
+                "substrate-warmup-custom",
                 testnet_genesis(
-                    vec![get_authority_keys_from_seed("Alice")],
+                    (validator_grandpa.clone(), validator_babe.clone()),
+                    root_key.clone(),
+                    treasury.clone(),
+                ),
+                vec![],
+                None,
+                Some(&format!(
+                    "substrate-warmup-custom-{}-{}-{}-{}",
+                    validator_grandpa, validator_babe, root_key, treasury
+                )),
+                None,
+                None,
+            ),
+            Chain::Ved => ChainSpec::from_genesis(
+                "Substrate Warmup Local Dev Testnet",
+                "substrate-warmup-local",
+                testnet_genesis(
+                    (
+                        get_from_seed::<GrandpaId>("Alice"),
+                        get_from_seed::<BabeId>("Alice"),
+                    ),
                     get_from_seed::<AccountId>("Alice"),
                     get_from_seed::<AccountId>("Alice"),
-                )
-            },
-            vec![],
-            None,
-            None,
-            None,
-            None,
-        ),
+                ),
+                vec![],
+                None,
+                None,
+                None,
+                None,
+            ),
+        }
     }
 }
 
 fn testnet_genesis(
-    initial_authorities: Vec<(AccountId, AccountId, GrandpaId, BabeId)>,
+    initial_authority: (GrandpaId, BabeId),
     root_key: AccountId,
     treasury: AccountId,
 ) -> GenesisConfig {
@@ -96,16 +97,10 @@ fn testnet_genesis(
         }),
         sudo: Some(SudoConfig { key: root_key }),
         babe: Some(BabeConfig {
-            authorities: initial_authorities
-                .iter()
-                .map(|x| (x.3.clone(), 1))
-                .collect(),
+            authorities: vec![(initial_authority.1, 1)],
         }),
         grandpa: Some(GrandpaConfig {
-            authorities: initial_authorities
-                .iter()
-                .map(|x| (x.2.clone(), 1))
-                .collect(),
+            authorities: vec![(initial_authority.0, 1)],
         }),
         erc20: Some(Erc20Config {
             initial_tokens: vec![
@@ -133,16 +128,104 @@ fn testnet_genesis(
 /// Helper function to generate a crypto pair from seed
 pub fn get_from_seed<P: Public>(seed: &str) -> <P::Pair as Pair>::Public {
     P::Pair::from_string(&format!("//{}", seed), None)
-        .expect("static values are valid; qed")
+        .expect("invalid seed")
         .public()
 }
 
-/// Helper function to generate stash, controller and session key from seed
-pub fn get_authority_keys_from_seed(seed: &str) -> (AccountId, AccountId, GrandpaId, BabeId) {
-    (
-        get_from_seed::<AccountId>(&format!("{}//stash", seed)),
-        get_from_seed::<AccountId>(seed),
-        get_from_seed::<GrandpaId>(seed),
-        get_from_seed::<BabeId>(seed),
-    )
+fn parse_pubkey<T: Public>(imp: &str) -> Result<T, &'static str> {
+    let imp: &[u8] = imp.as_bytes();
+
+    // check key is 0x prefixed, remove prefix
+    let imp: &[u8] = if imp.starts_with(b"0x") {
+        &imp[2..]
+    } else {
+        return Err("public key shoud be prefixed with '0x'");
+    };
+
+    // check key is correct len
+    if imp.len() != 64 {
+        return Err("256 bit public key should be 64 hex digits");
+    }
+
+    // decode hex
+    let pk: Vec<u8> = hex::decode(imp).map_err(|err| {
+        use hex::FromHexError::*;
+        match err {
+            InvalidHexCharacter { .. } => "invalid hex character, must be [0-9][a-z][A-Z]",
+            OddLength => panic!("this should not happen"),
+            InvalidStringLength => panic!("this should not happen"),
+        }
+    })?;
+
+    assert_eq!(pk.len(), 32);
+
+    Ok(Public::from_slice(&pk))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn t_parse_pk() {
+        let valid_pk = "0x6e4e511be3eae0696f542e7c05f99e5f5e7b19ce311fc8ef7c2139e0505c305c";
+        parse_pubkey::<GrandpaId>(valid_pk).unwrap();
+        parse_pubkey::<BabeId>(valid_pk).unwrap();
+        parse_pubkey::<AccountId>(valid_pk).unwrap();
+        for invalid_pk in &[
+            "0x6e4e511be3eae0696f542e7c05f99e5f5e7b19ce311fc8ef7c2139e0505c305",
+            "6e4e511be3eae0696f542e7c05f99e5f5e7b19ce311fc8ef7c2139e0505c305c",
+            " 0x6e4e511be3eae0696f542e7c05f99e5f5e7b19ce311fc8ef7c2139e0505c305c",
+            "5EZLPYKPLdfHutUAxx7hYVqwxmtjcw6MrtNygajayUDQzoSM",
+            "//Alice",
+            "/Alice",
+            "Alice",
+            "wet comic voice screen voyage hobby target prevent cluster moral menu mammal",
+        ] {
+            parse_pubkey::<GrandpaId>(invalid_pk).unwrap_err();
+            parse_pubkey::<BabeId>(invalid_pk).unwrap_err();
+            parse_pubkey::<AccountId>(invalid_pk).unwrap_err();
+        }
+    }
+
+    #[test]
+    // this test takes several seconds, may be worth optimizing or removing
+    fn t_generate() {
+        let valid_pk = "0x6e4e511be3eae0696f542e7c05f99e5f5e7b19ce311fc8ef7c2139e0505c305c";
+
+        for chain in &[
+            Chain::Custom {
+                validator_grandpa: parse_pubkey::<GrandpaId>(valid_pk).unwrap(),
+                validator_babe: parse_pubkey::<BabeId>(valid_pk).unwrap(),
+                root_key: parse_pubkey::<AccountId>(valid_pk).unwrap(),
+                treasury: parse_pubkey::<AccountId>(valid_pk).unwrap(),
+            },
+            Chain::Ved,
+        ] {
+            chain.clone().generate().into_json(true).unwrap();
+            chain.clone().generate().into_json(false).unwrap();
+        }
+    }
+
+    #[test]
+    fn t_generate_protocol_id() {
+        let valid_pk = "0x6e4e511be3eae0696f542e7c05f99e5f5e7b19ce311fc8ef7c2139e0505c305c";
+
+        let genesis = Chain::Custom {
+            validator_grandpa: parse_pubkey::<GrandpaId>(valid_pk).unwrap(),
+            validator_babe: parse_pubkey::<BabeId>(valid_pk).unwrap(),
+            root_key: parse_pubkey::<AccountId>(valid_pk).unwrap(),
+            treasury: parse_pubkey::<AccountId>(valid_pk).unwrap(),
+        }
+        .generate();
+        let prot_id = genesis.protocol_id().unwrap();
+        assert_eq!(
+            prot_id,
+            "substrate-warmup-custom-\
+             5EZLPYKPLdfHutUAxx7hYVqwxmtjcw6MrtNygajayUDQzoSM-\
+             5EZLPYKPLdfHutUAxx7hYVqwxmtjcw6MrtNygajayUDQzoSM-\
+             5EZLPYKPLdfHutUAxx7hYVqwxmtjcw6MrtNygajayUDQzoSM-\
+             5EZLPYKPLdfHutUAxx7hYVqwxmtjcw6MrtNygajayUDQzoSM"
+        );
+    }
 }

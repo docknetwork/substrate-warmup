@@ -18,12 +18,17 @@
 #     http://localhost:9933
 #
 # 
-# To build an image that defaults to a different chain, use the default_chain arg:
+# To use a different chain specification set "chain_generator_args" when running docker build.
 #
-#   docker build --build-arg default_chain=ent -t dev-full-node .
-#                                          ^^^
-#                                           |
-#                       see the ./chainspecs directory for available options
+#   docker build --build-arg chain_generator_args=help -t dev-full-node .
+#                                                 ^^^^ Set this to "help" to see available options
+#
+#
+# To create and run a chain with custom a verifier, root-key, and treasury
+#
+#   subkey generate # subkey is often used for generating keypairs
+#   mypk=0x662b1ce11aaf35fad3e7b188f9ba28eb4f1cab3f0b991e587e294d6a6c58c332
+#   docker build --build-arg chain_generator_args="custom $mypk $mypk $mypk $mypk" -t dev-full-node .
 #
 #
 # For more customization, override the docker entrypoint: (example shown, disabling websocket rpc)
@@ -35,23 +40,49 @@
 #     dev-full-node                          \
 #     --rpc-cors all                         \
 #     --rpc-external                         \
-#     --chain /usr/share/chainspecs/ved.json # <- Don't forget the chainspec path. Otherwise the
-#                                                 container will run the wrong chain.
+#     --chain /chainspec.json                # <- Don't forget the chainspec path. Otherwise the
+#                                            #    container will run the wrong chain.
+
+# -------------- Build chainspec ---------------- #
+
+from parity/rust-builder:e015528d-20191003 as chainspec-builder
+
+copy . project
+workdir project
+
+run cargo fetch
+run cargo build --release --offline
+
+# set chain_generator_args to "help" to see available options
+arg chain_generator_args=ved
+
+# The user may run a command that doesn't generate a chain.
+# If they do, we halt the build process and allow them to read the result.
+run if [ "x${chain_generator_args}" = "xhelp" ] \
+	|| [ "x${chain_generator_args}" = "x--help" ] \
+	|| [ "x${chain_generator_args}" = "x-h" ] \
+	|| [ "x${chain_generator_args}" = "xversion" ] \
+	|| [ "x${chain_generator_args}" = "x--version" ] \
+	|| [ "x${chain_generator_args}" = "x-V" ] \
+	; then : \
+    ;     cargo run --release --offline -- help \
+	;     exit 1 \
+	; fi
+
+run cargo run --release --offline -- $chain_generator_args > /chainspec.json
+
+# -------------------- Run ---------------------- #
 
 from parity/substrate:2.0.0-870b976be
 
-# see the ./chainspecs directory for available options
-arg default_chain=ved
+copy --from=chainspec-builder /chainspec.json /chainspec.json
 
-copy ./chainspecs/*.json /usr/share/chainspecs/
-copy ./chainspecs/${default_chain}.json /usr/share/chainspecs/default.json
-
-entrypoint [                             \
-    "/usr/local/bin/substrate",          \
-	"--rpc-cors",                        \
-	"all",                               \
-	"--rpc-external",                    \
-	"--ws-external",                     \
-	"--chain",                           \
-	"/usr/share/chainspecs/default.json" \
+entrypoint [                    \
+    "/usr/local/bin/substrate", \
+	"--rpc-cors",               \
+	"all",                      \
+	"--rpc-external",           \
+	"--ws-external",            \
+	"--chain",                  \
+	"/chainspec.json"           \
 ]
