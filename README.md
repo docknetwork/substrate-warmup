@@ -5,12 +5,19 @@ chain and module config, which includes a multi token module and a voting module
 
 # Quick setup using Docker
 
-```
+```bash
 docker build -t full-node .
 docker run -p 9944:9944 full-node --alice
 ```
 
 See the Dockerfile for more details.
+
+# Quick p2p swarm simulation using docker-compose
+
+```bash
+docker-compose up --scale standard=5
+#                                  ^ number of default nodes to simulate
+```
 
 # Development setup
 
@@ -67,7 +74,8 @@ substrate --chain ./tmp/chainspec.json --alice --base-path ./tmp
 
 # Using the polkadot js UI
 
-Once the dev chain is running, natively or within docker, you can interact with it via browser.
+Once the dev chain is running, natively; within docker; or through docker-compose, you can interact
+with it via browser.
 
 Go to https://polkadot.js.org/apps/#/settings and set "remote endpoint" to your locally running node 127.0.0.1.
 
