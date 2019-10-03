@@ -1,16 +1,8 @@
 mod chain_spec;
-
-#[derive(structopt::StructOpt)]
-/// generate a substrate chainspec
-enum Chain {
-    /// Prints the chainspec for a shared testnet with bddap as validator
-    Ent,
-    /// Prints the chainspec for a testnet with Alice as validator
-    Ved,
-}
+mod serializable_genesis;
 
 #[paw::main]
-fn main(chain: Chain) {
-    let spec = chain_spec::generate(chain);
-    println!("{}", spec.to_json(true).unwrap());
+fn main(chain: chain_spec::Chain) {
+    let spec = chain.generate();
+    println!("{}", spec.into_json(true).unwrap());
 }

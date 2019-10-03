@@ -5,10 +5,13 @@ authors = ["Anonymous"]
 edition = "2018"
 
 [dependencies]
-node-template-runtime = { path = "runtime" }
 erc20 = { path = "modules/erc20" }
+hex = "0.4.0"
+node-template-runtime = { path = "runtime" }
 paw = "1.0.0"
 structopt = { version = "0.3.2", features = ["paw"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 
 [dependencies.substrate-consensus-babe-primitives]
 git = "https://github.com/paritytech/substrate.git"
@@ -23,6 +26,14 @@ git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
 [dependencies.substrate-service]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.substrate-telemetry]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.sr-primitives]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
