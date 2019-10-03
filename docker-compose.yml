@@ -1,0 +1,23 @@
+version: '3'
+
+# Defauls substrate ports:
+#   30333 - p2p
+#    9933 - http jsonrpc
+#    9944 - websocket jsonrpc
+
+services:
+  verifier: # verifier is also uses as the bootstrap node
+    build: .
+    command: ["--alice"]
+    ports:
+      - "30333:30333"
+
+  # you can use `docker-compose up --scale stantard=<n>` to spawn <n> standard nodes
+  # (--remove-orphans to remove)
+  standard:
+    build: .
+
+  rpc: # a node that exposes it's ws jsonrpc api*
+    build: .
+    ports:
+      - "9944:9944"

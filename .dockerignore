@@ -3,3 +3,4 @@
 tmp
 .git
 Dockerfile
+docker-compose.yml
