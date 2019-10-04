@@ -91,3 +91,7 @@ Once the key is loaded, you should see that Alice has a large account balance.
 To try out the erc20 module, go to https://polkadot.js.org/apps/#/extrinsics. You may need another dummy
 account if you want to send PSTABLE1 and PSTABLE2 around. Under the erc20 module in the extrinsics page, find
 the transfer() function which will send tokens. Set `token_id` to 0 for PSTABLE1, 1 for PSTABLE2.
+
+# Note about Licensing
+
+Dock's Substrate development is currently licensed under GPLv3 as inherited from paritytech/substrate. This license will change to Apache 2.0 in sync with Parity Technologies updating the entire Substrate toolset to Apache 2.0 as previously announced.
