@@ -94,4 +94,6 @@ the transfer() function which will send tokens. Set `token_id` to 0 for PSTABLE1
 
 # Note about Licensing
 
-Dock's Substrate development is currently licensed under GPLv3 as inherited from paritytech/substrate. This license will change to Apache 2.0 in sync with Parity Technologies updating the entire Substrate toolset to Apache 2.0 as previously announced.
+Dock's Substrate development is currently licensed under GPLv3 as inherited from
+paritytech/substrate. This license will change to Apache 2.0 in sync with Parity Technologies
+updating the entire Substrate toolset to Apache 2.0 as previously announced.
