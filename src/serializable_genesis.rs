@@ -126,6 +126,19 @@ impl<G> ChainSpec<G> {
     }
 }
 
+impl<G: RuntimeGenesis> Into<substrate_service::ChainSpec<G>> for ChainSpec<G> {
+    // Unfortunately we need to serialize then deserialize to do this conversion because of
+    // https://github.com/paritytech/substrate/issues/3750
+    fn into(self) -> substrate_service::ChainSpec<G> {
+        let json = self
+            .into_json(false)
+            .expect("error serializing chainspec while converting")
+            .into_bytes();
+        substrate_service::ChainSpec::from_json_bytes(json)
+            .expect("error serializing chainspec while converting")
+    }
+}
+
 impl<G: RuntimeGenesis> ChainSpec<G> {
     /// Dump to json string.
     pub fn into_json(self, raw: bool) -> Result<String, String> {
