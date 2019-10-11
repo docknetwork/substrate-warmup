@@ -17,11 +17,23 @@ substrate-warmup-chaingen = { path = ".." }
 tempdir = "0.3.7"
 websocket = "0.23.0"
 
+[dependencies.node-primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
 [dependencies.sr-primitives]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
+[dependencies.sr-version]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
 [dependencies.srml-metadata]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.srml-system]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
@@ -57,7 +69,11 @@ rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
-[dependencies.substrate-rpc]
+[dependencies.substrate-primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.substrate-rpc-api]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 

@@ -19,7 +19,7 @@ extern crate alloc;
 pub struct RunningFullNode {
     addr: SocketAddr,
     #[allow(dead_code)]
-    chain_store: TempDir,
+    store: TempDir, // temorary directory for chain db and keystore
     stop_tx: Option<Sender<()>>,
     thread: Option<JoinHandle<()>>,
 }
@@ -30,16 +30,16 @@ impl RunningFullNode {
     /// Panics if node fails to respond with metadata after startup.
     pub fn new() -> Self {
         let addr = any_available_local_addr();
-        let chain_store = TempDir::new("").unwrap();
+        let store = TempDir::new("").unwrap();
         let (stop_tx, stop_rx) = channel();
         let thread = spawn({
-            let chain_store = chain_store.path().join("chain");
+            let store = store.path().to_path_buf().clone();
             let addr = addr.clone();
-            move || log_err(run_node(addr, chain_store, stop_rx))
+            move || log_err(run_node(addr, store, stop_rx))
         });
         let ret = Self {
             addr,
-            chain_store,
+            store,
             stop_tx: Some(stop_tx),
             thread: Some(thread),
         };
@@ -90,16 +90,13 @@ impl substrate_executor::NativeExecutionDispatch for NoNativeExecutor {
 }
 
 // run node until 'close' receives an item or is cancelled or and error stops the node
-fn run_node(
-    addr: SocketAddr,
-    chain_store: PathBuf,
-    close: Receiver<()>,
-) -> Result<(), &'static str> {
+fn run_node(addr: SocketAddr, store: PathBuf, close: Receiver<()>) -> Result<(), &'static str> {
     let mut config = substrate_service::Configuration::<(), _>::default_with_spec(make_chainspec());
     config.rpc_ws = Some(addr);
     config.rpc_ws_max_connections = Some(1);
     config.rpc_cors = None; // all connections are allowed
-    config.database_path = chain_store;
+    config.database_path = store.join("database");
+    config.keystore_path = store.join("keystore");
 
     let service = full_start(config)
         .map_err(|_| "failed to create service builder")?

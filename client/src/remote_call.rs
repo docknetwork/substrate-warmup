@@ -1,7 +1,6 @@
 extern crate alloc;
 
 use crate::method::Method;
-use crate::serde_as_scale::SerdeAsScale;
 use core::fmt::{Debug, Display};
 use futures::{future::Future, sink::Sink, stream::Stream};
 use jrpc::{Id, Request, Response, V2_0};
@@ -9,8 +8,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use websocket::{ClientBuilder, OwnedMessage};
 
 pub fn call<M: Method>(url: &str, arg: M::Args) -> Result<M::Return, String> {
-    let ret: SerdeAsScale<M::Return> = get_sumpm(url, M::NAME, arg)?;
-    Ok(ret.0)
+    get_sumpm(url, M::NAME, arg).map_err(context(M::NAME))
 }
 
 fn get_sumpm<Return: DeserializeOwned>(
@@ -25,6 +23,8 @@ fn get_sumpm<Return: DeserializeOwned>(
         id: Id::Int(rand::random::<i64>().abs()).into(),
     };
 
+    let request = serde_json::to_string(&req).map_err(context("serializing rpc call"))?;
+
     let (duplex, _headers) = ClientBuilder::new(url)
         .unwrap()
         .async_connect_insecure()
@@ -32,9 +32,7 @@ fn get_sumpm<Return: DeserializeOwned>(
         .map_err(context("building ws rpc client"))?;
 
     let duplex = duplex
-        .send(OwnedMessage::Text(
-            serde_json::to_string(&req).map_err(context("serializing rpc call"))?,
-        ))
+        .send(OwnedMessage::Text(request))
         .wait()
         .map_err(context("sending rpc call"))?;
 
@@ -48,13 +46,20 @@ fn get_sumpm<Return: DeserializeOwned>(
         _ => Err("received non-text packet").map_err(context("reading rpc response"))?,
     };
 
-    let resp: Response<Return> =
-        serde_json::from_str(&text).map_err(context("deserializing rpc response"))?;
+    let respres = serde_json::from_str(&text).map_err(context("deserializing rpc response"));
+    let resp: Response<Return> = respres?;
+
+    let respid = match &resp {
+        Response::Ok(o) => o.id.clone(),
+        Response::Err(e) => e.id.clone(),
+    };
+    if req.id != respid.into() {
+        Err("rpc request id mismatch")?;
+    }
+
     let success = match resp {
         Response::Ok(success) => success,
-        Response::Err(_) => {
-            Err("recieved rpc err response").map_err(context("checking rpc response"))?
-        }
+        Response::Err(e) => Err(e).map_err(context("checking rpc response"))?,
     };
 
     Ok(success.result)
