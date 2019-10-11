@@ -1,17 +1,27 @@
-use crate::method::{Method, StateGetMetadata};
 use alloc::sync::Arc;
 use core::any::Any;
 use core::fmt::Debug;
+use futures::future::{err, ok};
 use futures::sync::oneshot::{self, channel, Receiver, Sender};
 use futures::Future;
+use jsonrpc_client_transports::transports;
+use jsonrpc_client_transports::RpcChannel;
+use jsonrpc_client_transports::RpcError;
 use node_template_runtime::GenesisConfig;
+use sr_primitives::generic;
 use std::net::{Ipv6Addr, SocketAddr, TcpListener};
 use std::path::PathBuf;
 use std::thread::spawn;
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
+use substrate_client::LongestChain;
+use substrate_executor::NativeVersion;
+use substrate_executor::{Blake2Hasher, Externalities, NativeExecutionDispatch};
+use substrate_finality_grandpa::FinalityProofProvider;
+use substrate_inherents::InherentDataProviders;
 use substrate_network::construct_simple_protocol;
 use substrate_service::{AbstractService, ChainSpec};
+use substrate_transaction_pool::{txpool::Pool, ChainApi};
 use tempdir::TempDir;
 
 extern crate alloc;
@@ -28,7 +38,7 @@ impl RunningFullNode {
     /// # Panics
     ///
     /// Panics if node fails to respond with metadata after startup.
-    pub fn new() -> Self {
+    pub fn new() -> impl Future<Item = Self, Error = String> {
         let addr = any_available_local_addr();
         let store = TempDir::new("").unwrap();
         let (stop_tx, stop_rx) = channel();
@@ -37,6 +47,7 @@ impl RunningFullNode {
             let addr = addr.clone();
             move || log_err(run_node(addr, store, stop_rx))
         });
+        let url = format!("ws://{}", addr).parse().unwrap();
         let ret = Self {
             addr,
             store,
@@ -45,27 +56,28 @@ impl RunningFullNode {
         };
 
         // wait for full-node to be running
-        timeout(Duration::from_secs(10), || {
-            ret.remote_call::<StateGetMetadata>([]).ok()
+        timeout(Duration::from_secs(10), move || {
+            transports::ws::connect::<RpcChannel>(&url)
+                .map(|_| ())
+                .map_err(|_| ())
         })
-        .expect("timeout while waiting for full node to start");
-
-        ret
+        .map_err(|duration| {
+            format!(
+                "timeout while waiting for RunningFullNode to start. Took {:?}",
+                duration
+            )
+        })
+        .map(|()| ret)
     }
 
-    pub fn remote_call<M: Method>(&self, arg: M::Args) -> Result<M::Return, String> {
-        crate::remote_call::call::<M>(&format!("ws://{}", self.addr), arg)
+    pub fn client_channel(&self) -> impl Future<Item = RpcChannel, Error = RpcError> {
+        let url = format!("ws://{}", self.addr).parse().unwrap();
+        transports::ws::connect(&url)
     }
 }
 
 impl Drop for RunningFullNode {
     fn drop(&mut self) {
-        if self.remote_call::<StateGetMetadata>([]).is_err() {
-            eprintln!("Full node was not functioning at the end of a test.");
-            if !std::thread::panicking() {
-                panic!()
-            }
-        }
         log_err(self.stop_tx.take().ok_or(()).and_then(|t| t.send(())));
         log_err(self.thread.take().ok_or(()).map(|t| log_err(t.join())));
     }
@@ -73,9 +85,9 @@ impl Drop for RunningFullNode {
 
 struct NoNativeExecutor;
 
-impl substrate_executor::NativeExecutionDispatch for NoNativeExecutor {
+impl NativeExecutionDispatch for NoNativeExecutor {
     fn dispatch(
-        _ext: &mut dyn substrate_executor::Externalities<substrate_executor::Blake2Hasher>,
+        _ext: &mut dyn Externalities<Blake2Hasher>,
         _method: &str,
         _data: &[u8],
     ) -> Result<Vec<u8>, substrate_executor::error::Error> {
@@ -84,7 +96,7 @@ impl substrate_executor::NativeExecutionDispatch for NoNativeExecutor {
         ))
     }
 
-    fn native_version() -> substrate_executor::NativeVersion {
+    fn native_version() -> NativeVersion {
         node_template_runtime::native_version()
     }
 }
@@ -116,8 +128,8 @@ fn make_chainspec() -> ChainSpec<GenesisConfig> {
         .into()
 }
 
-type OpaqueBlock = sr_primitives::generic::Block<
-    sr_primitives::generic::Header<u32, sr_primitives::traits::BlakeTwo256>,
+type OpaqueBlock = generic::Block<
+    generic::Header<u32, sr_primitives::traits::BlakeTwo256>,
     sr_primitives::OpaqueExtrinsic,
 >;
 
@@ -133,13 +145,8 @@ fn full_start(
         node_template_runtime::RuntimeApi,
         NoNativeExecutor,
     >(config)?
-    .with_select_chain(|_config, backend| Ok(substrate_client::LongestChain::new(backend.clone())))?
-    .with_transaction_pool(|config, client| {
-        Ok(substrate_transaction_pool::txpool::Pool::new(
-            config,
-            substrate_transaction_pool::ChainApi::new(client),
-        ))
-    })?
+    .with_select_chain(|_config, backend| Ok(LongestChain::new(backend.clone())))?
+    .with_transaction_pool(|config, client| Ok(Pool::new(config, ChainApi::new(client))))?
     .with_import_queue(|_config, client, mut select_chain, transaction_pool| {
         let select_chain = select_chain
             .take()
@@ -162,7 +169,7 @@ fn full_start(
                 None,
                 client.clone(),
                 client,
-                substrate_inherents::InherentDataProviders::new(),
+                InherentDataProviders::new(),
                 Some(transaction_pool),
             )?;
 
@@ -170,9 +177,7 @@ fn full_start(
     })?
     .with_network_protocol(|_| Ok(NodeProtocol::new()))?
     .with_finality_proof_provider(|client, backend| {
-        Ok(Arc::new(
-            substrate_finality_grandpa::FinalityProofProvider::new(backend, client),
-        ))
+        Ok(Arc::new(FinalityProofProvider::new(backend, client)))
     })?
     .build()
 }
@@ -202,14 +207,26 @@ fn any_available_local_addr() -> SocketAddr {
 
 // Keep attempting f until f returns Ok or until timeout is reached
 // returns Err on timeout, Ok on success
-fn timeout<T>(timeout: Duration, f: impl Fn() -> Option<T>) -> Result<T, Duration> {
+fn timeout<T, Fo: Future<Item = T, Error = ()>>(
+    timeout: Duration,
+    f: impl Fn() -> Fo,
+) -> impl Future<Item = T, Error = Duration> {
+    use futures::future::Loop;
+
     let start = Instant::now();
     let end = start + timeout;
-    while end > Instant::now() {
-        match f() {
-            Some(t) => return Ok(t),
-            _ => {}
-        };
-    }
-    Err(Instant::now() - start)
+
+    futures::future::loop_fn((start, end), move |(start, end)| {
+        f().then(move |res| {
+            if let Ok(t) = res {
+                return ok(Loop::Break(t));
+            }
+
+            if Instant::now() > end {
+                return err(Instant::now() - start);
+            }
+
+            ok(Loop::Continue((start, end)))
+        })
+    })
 }

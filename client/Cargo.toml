@@ -1,35 +1,22 @@
 [package]
-authors = ["Andrew Dirksen <andrew@dirksen.com>"]
-edition = "2018"
 name = "client"
 version = "0.1.0"
+authors = ["Andrew Dirksen <andrew@dirksen.com>"]
+edition = "2018"
 
 [dependencies]
 futures = "0.1.29"
-hex = "0.3.1"
-jrpc = "0.4.0"
 node-template-runtime = { path = "../runtime" }
 parity-scale-codec = "1.0.0"
-rand = "0.7.2"
 serde = "1"
 serde_json = "1"
 substrate-warmup-chaingen = { path = ".." }
+tokio = "0.1"
 tempdir = "0.3.7"
-websocket = "0.23.0"
-
-[dependencies.node-primitives]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+jsonrpc-client-transports = { version = "13", features = ["ws"] }
+jsonrpc-core-client = "13"
 
 [dependencies.sr-primitives]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
-
-[dependencies.sr-version]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
-
-[dependencies.srml-metadata]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
@@ -37,19 +24,23 @@ rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
+[dependencies.srml-metadata]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.substrate-network]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.substrate-service]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
 [dependencies.substrate-client]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
-[dependencies.substrate-client-db]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
-
 [dependencies.substrate-consensus-babe]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
-
-[dependencies.substrate-consensus-common]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
@@ -65,23 +56,7 @@ rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
-[dependencies.substrate-network]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
-
-[dependencies.substrate-primitives]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
-
 [dependencies.substrate-rpc-api]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
-
-[dependencies.substrate-service]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
-
-[dependencies.substrate-transaction-graph]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
