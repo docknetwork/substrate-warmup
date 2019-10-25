@@ -392,7 +392,9 @@ dependencies = [
 name = "client"
 version = "0.1.0"
 dependencies = [
+ "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.29 (registry+https://github.com/rust-lang/crates.io-index)",
+ "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "jsonrpc-client-transports 13.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "jsonrpc-core-client 13.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "node-template-runtime 2.0.0",
@@ -408,12 +410,14 @@ dependencies = [
  "substrate-finality-grandpa 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
  "substrate-inherents 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
  "substrate-network 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
+ "substrate-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
  "substrate-rpc-api 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
  "substrate-service 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
  "substrate-transaction-pool 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
  "substrate-warmup-chaingen 0.1.0",
  "tempdir 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio 0.1.22 (registry+https://github.com/rust-lang/crates.io-index)",
+ "url 1.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

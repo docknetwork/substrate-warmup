@@ -5,9 +5,12 @@ authors = ["Andrew Dirksen <andrew@dirksen.com>"]
 edition = "2018"
 
 [dependencies]
+failure = "0.1.5"
 futures = "0.1.29"
+hex = "0.4.0"
 node-template-runtime = { path = "../runtime" }
 parity-scale-codec = "1.0.0"
+url = "1"
 serde = "1"
 serde_json = "1"
 substrate-warmup-chaingen = { path = ".." }
@@ -53,6 +56,10 @@ git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 
 [dependencies.substrate-inherents]
+git = "https://github.com/paritytech/substrate.git"
+rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+
+[dependencies.substrate-primitives]
 git = "https://github.com/paritytech/substrate.git"
 rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
 

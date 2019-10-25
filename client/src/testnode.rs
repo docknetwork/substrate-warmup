@@ -1,12 +1,11 @@
+use crate::NodeRpcClient;
 use alloc::sync::Arc;
 use core::any::Any;
 use core::fmt::Debug;
 use futures::future::{err, ok};
 use futures::sync::oneshot::{self, channel, Receiver, Sender};
 use futures::Future;
-use jsonrpc_client_transports::transports;
-use jsonrpc_client_transports::RpcChannel;
-use jsonrpc_client_transports::RpcError;
+use jsonrpc_client_transports::{RpcChannel, RpcError};
 use node_template_runtime::GenesisConfig;
 use sr_primitives::generic;
 use std::net::{Ipv6Addr, SocketAddr, TcpListener};
@@ -27,11 +26,11 @@ use tempdir::TempDir;
 extern crate alloc;
 
 pub struct RunningFullNode {
-    addr: SocketAddr,
     #[allow(dead_code)]
     store: TempDir, // temorary directory for chain db and keystore
     stop_tx: Option<Sender<()>>,
     thread: Option<JoinHandle<()>>,
+    client: NodeRpcClient<node_template_runtime::Runtime>,
 }
 
 impl RunningFullNode {
@@ -48,18 +47,10 @@ impl RunningFullNode {
             move || log_err(run_node(addr, store, stop_rx))
         });
         let url = format!("ws://{}", addr).parse().unwrap();
-        let ret = Self {
-            addr,
-            store,
-            stop_tx: Some(stop_tx),
-            thread: Some(thread),
-        };
 
         // wait for full-node to be running
         timeout(Duration::from_secs(10), move || {
-            transports::ws::connect::<RpcChannel>(&url)
-                .map(|_| ())
-                .map_err(|_| ())
+            NodeRpcClient::connect(&url).map_err(|_| ())
         })
         .map_err(|duration| {
             format!(
@@ -67,12 +58,16 @@ impl RunningFullNode {
                 duration
             )
         })
-        .map(|()| ret)
+        .map(move |client| Self {
+            store,
+            stop_tx: Some(stop_tx),
+            thread: Some(thread),
+            client,
+        })
     }
 
-    pub fn client_channel(&self) -> impl Future<Item = RpcChannel, Error = RpcError> {
-        let url = format!("ws://{}", self.addr).parse().unwrap();
-        transports::ws::connect(&url)
+    pub fn client(&self) -> &NodeRpcClient<node_template_runtime::Runtime> {
+        &self.client
     }
 }
 
