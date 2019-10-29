@@ -1,4 +1,5 @@
 pub mod method;
+pub mod storage;
 pub mod testnode;
 pub mod wrapped_client;
 
@@ -160,7 +161,7 @@ mod tests {
             .and_then(|opaque| -> Result<RuntimeMetadataPrefixed, _> {
                 DecodeAll::decode_all(&opaque).map_err(Into::into) // parse as RuntimeMetadataPrefixed
             });
-        
+
         Box::new(ret.map(|_| ()))
     }
 }
