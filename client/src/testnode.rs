@@ -5,7 +5,6 @@ use core::fmt::Debug;
 use futures::future::{err, ok};
 use futures::sync::oneshot::{self, channel, Receiver, Sender};
 use futures::Future;
-use jsonrpc_client_transports::{RpcChannel, RpcError};
 use node_template_runtime::GenesisConfig;
 use sr_primitives::generic;
 use std::net::{Ipv6Addr, SocketAddr, TcpListener};
