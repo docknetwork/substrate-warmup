@@ -640,9 +640,52 @@ mod test {
     }
 
     #[test]
-    #[ignore] // not yet implemented
+    fn approve_transfer_from_self() {
+        with_externalities(&mut new_test_ext(), || {
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
+            TemplateModule::approve(Origin::signed(A), 0, A, 10).unwrap();
+            TemplateModule::transfer_from(Origin::signed(A), 0, A, A, 10).unwrap();
+            assert_eq!(TemplateModule::balance_of((0, A)), 10);
+        });
+    }
+
+    #[test]
+    fn approve_transfer_from_self_overflow() {
+        with_externalities(&mut new_test_ext(), || {
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
+            TemplateModule::approve(Origin::signed(A), 0, A, 10).unwrap();
+            TemplateModule::transfer_from(Origin::signed(A), 0, A, A, 20).unwrap_err();
+            assert_eq!(TemplateModule::balance_of((0, A)), 10);
+        });
+    }
+
+    #[test]
     fn approve_transfer_from() {
-        unimplemented!();
+        with_externalities(&mut new_test_ext(), || {
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
+            TemplateModule::approve(Origin::signed(A), 0, B, 10).unwrap();
+            TemplateModule::transfer_from(Origin::signed(A), 0, A, B, 5).unwrap();
+            assert_eq!(TemplateModule::balance_of((0, B)), 5);
+        });
+    }
+
+    #[test]
+    fn approve_transfer_from_overflow() {
+        with_externalities(&mut new_test_ext(), || {
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
+            TemplateModule::approve(Origin::signed(A), 0, B, 10).unwrap();
+            TemplateModule::transfer_from(Origin::signed(A), 0, A, B, 20).unwrap_err();
+            assert_eq!(TemplateModule::balance_of((0, B)), 0);
+        });
+    }
+
+    #[test]
+    fn not_approved_transfer_from() {
+        with_externalities(&mut new_test_ext(), || {
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
+            TemplateModule::transfer_from(Origin::signed(A), 0, A, B, 10).unwrap_err();
+            assert_eq!(TemplateModule::balance_of((0, B)), 0);
+        });
     }
 
     #[test]
