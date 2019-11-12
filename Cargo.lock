@@ -666,7 +666,7 @@ dependencies = [
  "substrate-offchain-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
  "substrate-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
  "substrate-session 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
- "substrate-wasm-builder-runner 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "substrate-wasm-builder-runner 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -2021,7 +2021,7 @@ dependencies = [
  "substrate-offchain-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
  "substrate-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
  "substrate-session 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
- "substrate-wasm-builder-runner 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "substrate-wasm-builder-runner 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -2090,7 +2090,7 @@ dependencies = [
  "substrate-offchain-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
  "substrate-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
  "substrate-session 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)",
- "substrate-wasm-builder-runner 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "substrate-wasm-builder-runner 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "voting 0.1.0",
 ]
 
@@ -4092,7 +4092,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-wasm-builder-runner"
-version = "1.0.3"
+version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -5289,7 +5289,7 @@ dependencies = [
 "checksum substrate-transaction-graph 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)" = "<none>"
 "checksum substrate-transaction-pool 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)" = "<none>"
 "checksum substrate-trie 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=870b976bec729aaf26cc237df9fd764b8f7b9d7e)" = "<none>"
-"checksum substrate-wasm-builder-runner 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "af21b27fad38b212c1919f700cb0def33c88cde14d22e0d1b17d4521f4eb8b40"
+"checksum substrate-wasm-builder-runner 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)" = "bd48273fe9d7f92c1f7d6c1c537bb01c8068f925b47ad2cd8367e11dc32f8550"
 "checksum subtle 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "2d67a5a62ba6e01cb2192ff309324cb4875d0c451d55fe2319433abe7a05a8ee"
 "checksum subtle 2.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "01f40907d9ffc762709e4ff3eb4a6f6b41b650375a3f09ac92b641942b7fb082"
 "checksum syn 0.15.44 (registry+https://github.com/rust-lang/crates.io-index)" = "9ca4b3b69a77cbe1ffc9e198781b7acb0c7365a883670e8f1c1bc66fba79a5c5"

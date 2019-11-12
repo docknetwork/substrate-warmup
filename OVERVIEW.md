@@ -69,22 +69,13 @@ A docker recipe is included for ease of use.
 
 # Imports
 
-Substrate crates are imported individually from the substrate repo. Each crate import references
-our pinned substrate version:
+Substrate crates are [patched](https://doc.rust-lang.org/cargo/reference/manifest.html#the-patch-section)
+in './Cargo.toml' to use a pinned version of substrate. Member crates can depend on substrate
+members by name.
 
 ```toml
-[dependencies.substrate-consensus-babe-primitives]
-git = "https://github.com/paritytech/substrate.git"
-rev = "870b976bec729aaf26cc237df9fd764b8f7b9d7e"
+substrate-consensus-babe-primitives = "2"
 ```
-
-We hope to expose all substrate modules from a single super-crate:
-
-```toml
-substrate = { path = "./substrate-proxy" }
-```
-
-getting that to work is non-trivial, so it's a WIP.
 
 # Integration tests
 
