@@ -675,6 +675,7 @@ mod test {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::approve(Origin::signed(A), 0, B, 10).unwrap();
             TemplateModule::transfer_from(Origin::signed(A), 0, A, B, 20).unwrap_err();
+            assert_eq!(TemplateModule::balance_of((0, A)), 10);
             assert_eq!(TemplateModule::balance_of((0, B)), 0);
         });
     }
@@ -688,6 +689,20 @@ mod test {
         });
     }
 
+
+    #[test]
+    fn sequential_calls_of_transfer_from() {
+        with_externalities(&mut new_test_ext(), || {
+            TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
+            TemplateModule::approve(Origin::signed(A), 0, B, 10).unwrap();
+            TemplateModule::transfer_from(Origin::signed(A), 0, A, B, 5).unwrap();
+            TemplateModule::transfer_from(Origin::signed(A), 0, A, B, 5).unwrap();
+            TemplateModule::transfer_from(Origin::signed(A), 0, A, B, 5).unwrap_err();
+            assert_eq!(TemplateModule::balance_of((0, B)), 10);
+            assert_eq!(TemplateModule::balance_of((0, A)), 0);
+        });
+    }
+    
     #[test]
     #[ignore] // not yet implemented
     fn events() {
