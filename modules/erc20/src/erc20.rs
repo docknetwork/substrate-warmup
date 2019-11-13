@@ -104,9 +104,11 @@ decl_module! {
         // permanently discard, throw away tokens
         pub fn burn(origin, token_id: u32, value: T::TokenBalance) -> Result {
             let account = ensure_signed(origin)?;
-            let key = (token_id, account);
+            let key = (token_id, account.clone());
             let bal = <BalanceOf<T>>::get(&key).checked_sub(&value).ok_or("Not enough balance.")?;
             <BalanceOf<T>>::insert(key, bal);
+
+            Self::deposit_event(RawEvent::Burn(token_id, account.clone(),  value));
             Ok(())
         }
     }
@@ -174,6 +176,9 @@ decl_event!(
         // event when an approval is made
         // tokenid, owner, spender, value
         Approval(u32, AccountId, AccountId, Balance),
+        // event for burn of tokens
+        // tokenid, owner, value
+        Burn(u32, AccountId, Balance),
     }
 );
 
