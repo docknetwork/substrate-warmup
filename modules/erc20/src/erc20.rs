@@ -108,7 +108,7 @@ decl_module! {
             let bal = <BalanceOf<T>>::get(&key).checked_sub(&value).ok_or("Not enough balance.")?;
             <BalanceOf<T>>::insert(key, bal);
 
-            Self::deposit_event(RawEvent::Burn(token_id, account.clone(),  value));
+            Self::deposit_event(RawEvent::Burn(token_id, account,  value));
             Ok(())
         }
     }
