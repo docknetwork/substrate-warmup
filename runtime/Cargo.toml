@@ -5,58 +5,65 @@ authors = ["Anonymous"]
 edition = "2018"
 
 [dependencies]
-serde = { version = "1.0", optional = true, features = ["derive"] }
-safe-mix = { version = "1.0", default-features = false }
+serde = { version = "1.0.101", optional = true, features = ["derive"] }
+safe-mix = { version = "1.0.0", default-features = false }
 codec = { package = "parity-scale-codec", version = "1.0.0", default-features = false, features = ["derive"] }
+runtime-io = { version = "2", package = "sr-io", default_features = false }
+version = { version = "2", package = "sr-version", default_features = false }
+support = { version = "2", package = "srml-support", default_features = false }
+primitives = { version = "2", package = "substrate-primitives", default_features = false }
+substrate-session = { version = "2", default-features = false }
+balances = { version = "2", package = "srml-balances", default_features = false }
+aura = { version = "2", package = "srml-aura", default_features = false }
+aura-primitives = { version = "2", package = "substrate-consensus-aura-primitives", default_features = false }
+grandpa = { version = "2", package = "srml-grandpa", default_features = false }
+executive = { version = "2", package = "srml-executive", default_features = false }
+indices = { version = "2", package = "srml-indices", default_features = false }
+randomness-collective-flip = { version = "2", package = "srml-randomness-collective-flip", default_features = false }
+system = { version = "2", package = "srml-system", default_features = false }
+timestamp = { version = "2", package = "srml-timestamp", default_features = false }
+sudo = { version = "2", package = "srml-sudo", default_features = false }
+transaction-payment = { version = "2", package = "srml-transaction-payment", default_features = false }
+sr-primitives = { version = "2", default_features = false }
+sr-api = { version = "2", default_features = false }
+offchain-primitives = { version = "2", package = "substrate-offchain-primitives", default-features = false }
+block-builder-api = { version = "2", package = "substrate-block-builder-runtime-api", default-features = false }
+tx-pool-api = { version = "2", package = "substrate-transaction-pool-runtime-api", default-features = false }
+inherents = { version = "2", package = "substrate-inherents", default-features = false }
 erc20 = { path = "../modules/erc20", default-features = false }
 voting = { path = "../modules/voting", default-features = false }
-rstd = { version = "2", package = "sr-std", default-features = false }
-runtime-io = { version = "2", package = "sr-io", default-features = false }
-version = { version = "2", package = "sr-version", default-features = false }
-support = { version = "2", package = "srml-support", default-features = false }
-primitives = { version = "2", package = "substrate-primitives", default-features = false }
-substrate-session = { version = "2", default-features = false }
-balances = { version = "2", package = "srml-balances", default-features = false }
-babe = { version = "2", package = "srml-babe", default-features = false }
-babe-primitives = { version = "2", package = "substrate-consensus-babe-primitives", default-features = false }
-executive = { version = "2", package = "srml-executive", default-features = false }
-indices = { version = "2", package = "srml-indices", default-features = false }
-grandpa = { version = "2", package = "srml-grandpa", default-features = false }
-system = { version = "2", package = "srml-system", default-features = false }
-timestamp = { version = "2", package = "srml-timestamp", default-features = false }
-sudo = { version = "2", package = "srml-sudo", default-features = false }
-sr-primitives = { version = "2", default-features = false }
-client = { version = "2", package = "substrate-client", default-features = false }
-offchain-primitives= { version = "2", package = "substrate-offchain-primitives", default-features = false }
 
 [build-dependencies]
-wasm-builder-runner = { package = "substrate-wasm-builder-runner", version = "1.0.2" }
+wasm-builder-runner = { package = "substrate-wasm-builder-runner", version = "1.0.4" }
 
 [features]
 default = ["std"]
 std = [
-  "codec/std",
-  "client/std",
-  "rstd/std",
-  "runtime-io/std",
-  "support/std",
-  "balances/std",
-  "babe/std",
-  "babe-primitives/std",
-  "executive/std",
-  "indices/std",
-  "grandpa/std",
-  "primitives/std",
-  "sr-primitives/std",
-  "system/std",
-  "timestamp/std",
-  "sudo/std",
-  "version/std",
-  "serde",
-  "safe-mix/std",
-  "offchain-primitives/std",
-  "substrate-session/std",
-  "erc20/std",
-  "voting/std",
+	"codec/std",
+	"sr-api/std",
+	"runtime-io/std",
+	"support/std",
+	"balances/std",
+	"aura/std",
+	"aura-primitives/std",
+	"grandpa/std",
+	"executive/std",
+	"indices/std",
+	"primitives/std",
+	"sr-primitives/std",
+	"randomness-collective-flip/std",
+	"system/std",
+	"timestamp/std",
+	"sudo/std",
+	"transaction-payment/std",
+	"version/std",
+	"serde",
+	"safe-mix/std",
+	"offchain-primitives/std",
+	"substrate-session/std",
+	"block-builder-api/std",
+	"tx-pool-api/std",
+	"inherents/std",
+	"erc20/std",
+    "voting/std",
 ]
-no_std = []

@@ -33,17 +33,16 @@ extern crate srml_system as system;
 extern crate substrate_primitives as primitives;
 
 pub mod voting;
-pub use voting::{Event, Module, RawEvent, Trait};
-pub use voting::{TallyType, VoteData, VoteRecord, VoteStage, VoteType};
+pub use crate::voting::{Event, Module, RawEvent, Trait};
+pub use crate::voting::{TallyType, VoteData, VoteRecord, VoteStage, VoteType};
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use codec::Encode;
-    use primitives::{Blake2Hasher, H256};
+    use primitives::H256;
     use rstd::prelude::*;
     use rstd::result;
-    use runtime_io::with_externalities;
     use runtime_support::dispatch::Result;
     use system::{EventRecord, Phase};
     // The testing primitives are very useful for avoiding having to work with signatures
@@ -92,7 +91,6 @@ mod tests {
         type Lookup = IdentityLookup<Self::AccountId>;
         type Header = Header;
         type Event = Event;
-        type WeightMultiplierUpdate = ();
         type BlockHashCount = BlockHashCount;
         type MaximumBlockWeight = MaximumBlockWeight;
         type MaximumBlockLength = MaximumBlockLength;
@@ -109,7 +107,7 @@ mod tests {
 
     // This function basically just builds a genesis storage key/value store according to
     // our desired mockup.
-    fn new_test_ext() -> sr_io::TestExternalities<Blake2Hasher> {
+    fn new_test_ext() -> sr_io::TestExternalities {
         let t = system::GenesisConfig::default()
             .build_storage::<Test>()
             .unwrap();
@@ -315,7 +313,7 @@ mod tests {
 
     #[test]
     fn create_binary_vote_should_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_binary_vote();
@@ -350,7 +348,7 @@ mod tests {
 
     #[test]
     fn create_binary_vote_with_multi_options_should_not_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_binary_vote();
@@ -366,7 +364,7 @@ mod tests {
 
     #[test]
     fn create_multi_vote_should_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_multi_vote();
@@ -389,7 +387,7 @@ mod tests {
 
     #[test]
     fn create_multi_vote_with_binary_options_should_not_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_binary_vote();
@@ -405,7 +403,7 @@ mod tests {
 
     #[test]
     fn create_vote_with_one_outcome_should_not_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_multi_vote();
@@ -424,7 +422,7 @@ mod tests {
 
     #[test]
     fn commit_to_nonexistent_record_should_not_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let commit_value = SECRET;
@@ -437,7 +435,7 @@ mod tests {
 
     #[test]
     fn commit_to_non_commit_record_should_not_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_binary_vote();
@@ -452,7 +450,7 @@ mod tests {
 
     #[test]
     fn reveal_to_nonexistent_record_should_not_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let commit_value = SECRET;
@@ -465,7 +463,7 @@ mod tests {
 
     #[test]
     fn reveal_to_record_before_voting_period_should_not_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_binary_vote();
@@ -480,7 +478,7 @@ mod tests {
 
     #[test]
     fn advance_from_initiator_should_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_binary_vote();
@@ -526,7 +524,7 @@ mod tests {
 
     #[test]
     fn reveal_should_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_binary_vote();
@@ -575,7 +573,7 @@ mod tests {
 
     #[test]
     fn reveal_invalid_outcome_should_not_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_binary_vote();
@@ -592,7 +590,7 @@ mod tests {
 
     #[test]
     fn reveal_multi_outcome_should_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_multi_vote();
@@ -607,7 +605,7 @@ mod tests {
 
     #[test]
     fn complete_after_reveal_should_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_binary_vote();
@@ -666,7 +664,7 @@ mod tests {
 
     #[test]
     fn transition_to_commit_should_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_commit_reveal_binary_vote();
@@ -705,7 +703,7 @@ mod tests {
 
     #[test]
     fn reveal_before_commit_should_not_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_commit_reveal_binary_vote();
@@ -721,7 +719,7 @@ mod tests {
 
     #[test]
     fn reveal_commit_before_stage_change_should_not_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_commit_reveal_binary_vote();
@@ -749,7 +747,7 @@ mod tests {
 
     #[test]
     fn reveal_commit_should_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_commit_reveal_binary_vote();
@@ -821,7 +819,7 @@ mod tests {
 
     #[test]
     fn create_public_ranked_choice_vote_should_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_ranked_choice_vote();
@@ -858,7 +856,7 @@ mod tests {
 
     #[test]
     fn reveal_public_ranked_choice_vote_should_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_ranked_choice_vote();
@@ -902,7 +900,7 @@ mod tests {
 
     #[test]
     fn reveal_incorrect_outcomes_ranked_choice_should_fail() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_public_ranked_choice_vote();
@@ -917,7 +915,7 @@ mod tests {
 
     #[test]
     fn commit_reveal_ranked_choice_vote_should_work() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             System::set_block_number(1);
             let public = get_test_key();
             let vote = generate_1p1v_commit_reveal_ranked_choice_vote();

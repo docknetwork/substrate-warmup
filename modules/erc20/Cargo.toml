@@ -24,17 +24,15 @@ system = { version = "2", package = "srml-system", default-features = false }
 timestamp = { version = "2", package = "srml-timestamp", default-features = false }
 sudo = { version = "2", package = "srml-sudo", default-features = false }
 sr-primitives = { version = "2", default-features = false }
-client = { version = "2", package = "substrate-client", default-features = false }
 offchain-primitives = { version = "2", package = "substrate-offchain-primitives", default-features = false }
 
-[build-dependencies]
-wasm-builder-runner = { package = "substrate-wasm-builder-runner", version = "1.0.2" }
+[dev-dependencies]
+client = { version = "2", package = "substrate-client" }
 
 [features]
 default = ["std"]
 std = [
   "codec/std",
-  "client/std",
   "rstd/std",
   "runtime-io/std",
   "support/std",

@@ -73,7 +73,7 @@ run cargo run --release --offline -- $chain_generator_args > /chainspec.json
 
 # -------------------- Run ---------------------- #
 
-from parity/substrate:2.0.0-870b976be
+from parity/substrate:2.0.0-aa937d9b4
 
 copy --from=chainspec-builder /chainspec.json /chainspec.json
 

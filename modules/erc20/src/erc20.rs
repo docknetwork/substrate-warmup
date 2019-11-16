@@ -4,10 +4,7 @@ use rstd::prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sr_primitives::traits::{CheckedAdd, CheckedSub, Member, SimpleArithmetic};
-use support::{
-    decl_event, decl_module, decl_storage, dispatch::Result, ensure, Parameter, StorageMap,
-    StorageValue,
-};
+use support::{decl_event, decl_module, decl_storage, dispatch::Result, ensure, Parameter};
 use system::{self, ensure_root, ensure_signed};
 
 // the module trait
@@ -222,8 +219,7 @@ impl<T: Trait> Module<T> {
 mod test {
     use super::*;
 
-    use primitives::{Blake2Hasher, H256};
-    use runtime_io::with_externalities;
+    use primitives::H256;
     use sr_primitives::weights::Weight;
     use sr_primitives::Perbill;
     use sr_primitives::{
@@ -257,7 +253,6 @@ mod test {
         type AccountId = u64;
         type Lookup = IdentityLookup<Self::AccountId>;
         type Header = Header;
-        type WeightMultiplierUpdate = ();
         type Event = ();
         type BlockHashCount = BlockHashCount;
         type MaximumBlockWeight = MaximumBlockWeight;
@@ -276,7 +271,7 @@ mod test {
     const B: u64 = 1;
     const C: u64 = 2;
 
-    fn new_test_ext() -> runtime_io::TestExternalities<Blake2Hasher> {
+    fn new_test_ext() -> runtime_io::TestExternalities {
         system::GenesisConfig::default()
             .build_storage::<Test>()
             .unwrap()
@@ -286,7 +281,7 @@ mod test {
     /// create test env with some tokens pre-inited by the chainspec
     fn pre_alloc_ext(
         initial_tokens: Vec<(Erc20Token<u128>, u64)>,
-    ) -> runtime_io::TestExternalities<Blake2Hasher> {
+    ) -> runtime_io::TestExternalities {
         GenesisConfig::<Test> { initial_tokens }
             .build_storage()
             .unwrap()
@@ -296,7 +291,7 @@ mod test {
     /// send tokens from A to B
     #[test]
     fn xfer() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             // create a new token as A
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
 
@@ -313,7 +308,7 @@ mod test {
 
     #[test]
     fn init() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             assert_eq!(TemplateModule::balance_of((0, A)), 0);
             assert_eq!(TemplateModule::balance_of((1, A)), 0);
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
@@ -327,7 +322,7 @@ mod test {
 
     #[test]
     fn transfer_pong() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
             assert_eq!(TemplateModule::balance_of((0, B)), 0);
@@ -348,7 +343,7 @@ mod test {
 
     #[test]
     fn transfer_before_create() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::transfer(Origin::signed(A), 0, B, 1).unwrap_err();
             TemplateModule::transfer(Origin::signed(B), 0, A, 1).unwrap_err();
             TemplateModule::transfer(Origin::signed(A), 1, B, 1).unwrap_err();
@@ -357,7 +352,7 @@ mod test {
 
     #[test]
     fn transfer_none() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, B, 0).unwrap();
         });
@@ -365,7 +360,7 @@ mod test {
 
     #[test]
     fn transfer_twice() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, B, 5).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, B, 5).unwrap();
@@ -375,7 +370,7 @@ mod test {
 
     #[test]
     fn transfer_overflow() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(
                 Origin::ROOT,
                 A,
@@ -392,7 +387,7 @@ mod test {
 
     #[test]
     fn transfer_too_much() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, B, 11).unwrap_err();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
@@ -402,7 +397,7 @@ mod test {
 
     #[test]
     fn transfer_to_self() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, A, 10).unwrap();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
@@ -411,7 +406,7 @@ mod test {
 
     #[test]
     fn transfer_too_much_to_self() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, A, 11).unwrap_err();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
@@ -420,7 +415,7 @@ mod test {
 
     #[test]
     fn transfer_zero_to_self() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::transfer(Origin::signed(A), 0, A, 0).unwrap();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
@@ -429,7 +424,7 @@ mod test {
 
     #[test]
     fn default_balance_zero() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             assert_eq!(TemplateModule::balance_of((0, A)), 0);
             assert_eq!(TemplateModule::balance_of((0, B)), 0);
             assert_eq!(TemplateModule::balance_of((0, C)), 0);
@@ -449,7 +444,7 @@ mod test {
             },
             A,
         )];
-        with_externalities(&mut pre_alloc_ext(conf), || {
+        pre_alloc_ext(conf).execute_with(|| {
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
             assert_eq!(TemplateModule::balance_of((1, A)), 0);
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 20).unwrap();
@@ -478,7 +473,7 @@ mod test {
                 B,
             ),
         ];
-        with_externalities(&mut pre_alloc_ext(conf), || {
+        pre_alloc_ext(conf).execute_with(|| {
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
             assert_eq!(TemplateModule::balance_of((0, B)), 0);
             assert_eq!(TemplateModule::balance_of((1, A)), 0);
@@ -508,7 +503,7 @@ mod test {
                 B,
             ),
         ];
-        with_externalities(&mut pre_alloc_ext(conf), || {
+        pre_alloc_ext(conf).execute_with(|| {
             assert_eq!(
                 TemplateModule::token_details(0),
                 Erc20Token {
@@ -538,7 +533,7 @@ mod test {
 
     #[test]
     fn must_root() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::init(Origin::signed(A), A, b"Trash".to_vec(), b"TRS".to_vec(), 10)
                 .unwrap_err();
@@ -549,7 +544,7 @@ mod test {
     fn large_ticker_or_name() {
         let aa = b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
         assert_eq!(aa[..64].to_vec().len(), 64);
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, aa[..64].to_vec(), b"".to_vec(), 10).unwrap();
             TemplateModule::init(Origin::ROOT, A, b"".to_vec(), aa[..32].to_vec(), 10).unwrap();
             TemplateModule::init(Origin::ROOT, A, aa[..65].to_vec(), b"".to_vec(), 10).unwrap_err();
@@ -585,7 +580,7 @@ mod test {
             },
             A,
         )];
-        with_externalities(&mut pre_alloc_ext(conf), || {
+        pre_alloc_ext(conf).execute_with(|| {
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
             TemplateModule::burn(Origin::signed(A), 0, 5).unwrap();
             assert_eq!(TemplateModule::balance_of((0, A)), 5);
@@ -604,7 +599,7 @@ mod test {
             },
             A,
         )];
-        with_externalities(&mut pre_alloc_ext(conf), || {
+        pre_alloc_ext(conf).execute_with(|| {
             TemplateModule::burn(Origin::signed(A), 0, 11).unwrap_err();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
         });
@@ -620,7 +615,7 @@ mod test {
             },
             A,
         )];
-        with_externalities(&mut pre_alloc_ext(conf), || {
+        pre_alloc_ext(conf).execute_with(|| {
             TemplateModule::burn(Origin::signed(A), 1, 1).unwrap_err();
             TemplateModule::burn(Origin::signed(A), 1, 0).unwrap();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
@@ -638,7 +633,7 @@ mod test {
             },
             A,
         )];
-        with_externalities(&mut pre_alloc_ext(conf), || {
+        pre_alloc_ext(conf).execute_with(|| {
             TemplateModule::burn(Origin::signed(A), 0, 0).unwrap();
             assert_eq!(TemplateModule::balance_of((0, A)), 10);
         });
@@ -646,7 +641,7 @@ mod test {
 
     #[test]
     fn approve_transfer_from_self() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::approve(Origin::signed(A), 0, A, 10).unwrap();
             TemplateModule::transfer_from(Origin::signed(A), 0, A, A, 10).unwrap();
@@ -656,7 +651,7 @@ mod test {
 
     #[test]
     fn approve_transfer_from_self_overflow() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::approve(Origin::signed(A), 0, A, 10).unwrap();
             TemplateModule::transfer_from(Origin::signed(A), 0, A, A, 20).unwrap_err();
@@ -666,7 +661,7 @@ mod test {
 
     #[test]
     fn approve_transfer_from() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::approve(Origin::signed(A), 0, B, 10).unwrap();
             TemplateModule::transfer_from(Origin::signed(A), 0, A, B, 5).unwrap();
@@ -676,7 +671,7 @@ mod test {
 
     #[test]
     fn approve_transfer_from_overflow() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::approve(Origin::signed(A), 0, B, 10).unwrap();
             TemplateModule::transfer_from(Origin::signed(A), 0, A, B, 20).unwrap_err();
@@ -688,7 +683,7 @@ mod test {
     #[test]
     #[ignore] // https://github.com/docknetwork/substrate-warmup/issues/42
     fn approve_transfer_from_fail_then_succeed() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::approve(Origin::signed(A), 0, B, 20).unwrap();
             TemplateModule::transfer_from(Origin::signed(A), 0, A, B, 20).unwrap_err();
@@ -702,7 +697,7 @@ mod test {
 
     #[test]
     fn not_approved_transfer_from() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::transfer_from(Origin::signed(A), 0, A, B, 10).unwrap_err();
             assert_eq!(TemplateModule::balance_of((0, B)), 0);
@@ -711,7 +706,7 @@ mod test {
 
     #[test]
     fn sequential_calls_of_transfer_from() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
             TemplateModule::approve(Origin::signed(A), 0, B, 10).unwrap();
             TemplateModule::transfer_from(Origin::signed(A), 0, A, B, 5).unwrap();

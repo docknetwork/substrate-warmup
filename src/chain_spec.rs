@@ -1,17 +1,18 @@
-use crate::serializable_genesis::ChainSpec;
 use erc20::Erc20Token;
 use node_template_runtime::{
-    AccountId, BabeConfig, BalancesConfig, Erc20Config, GenesisConfig, GrandpaConfig,
-    IndicesConfig, SudoConfig, SystemConfig, WASM_BINARY,
+    AuraConfig, BalancesConfig, Erc20Config, GenesisConfig, GrandpaConfig, SudoConfig,
+    SystemConfig, WASM_BINARY,
 };
 use serde::{Deserialize, Serialize};
-use substrate_consensus_babe_primitives::AuthorityId as BabeId;
+use sr_primitives::AccountId32;
+use structopt::StructOpt;
+use substrate_chain_spec::ChainSpec;
+use substrate_consensus_aura_primitives::sr25519::AuthorityId as AuraId;
 use substrate_finality_grandpa_primitives::AuthorityId as GrandpaId;
+use substrate_primitives::sr25519;
 use substrate_primitives::{Pair, Public};
 
-#[derive(
-    structopt::StructOpt, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Serialize, Deserialize,
-)]
+#[derive(StructOpt, Clone, Eq, PartialEq, Ord, PartialOrd, Debug, Serialize, Deserialize)]
 /// generate a substrate chainspec
 pub enum Chain {
     /// Outputs the chainspec for a shared testnet with a custom validator, root, and treasury
@@ -19,11 +20,11 @@ pub enum Chain {
         #[structopt(parse(try_from_str = parse_pubkey))]
         validator_grandpa: GrandpaId,
         #[structopt(parse(try_from_str = parse_pubkey))]
-        validator_babe: BabeId,
-        #[structopt(parse(try_from_str = parse_pubkey))]
-        root_key: AccountId,
-        #[structopt(parse(try_from_str = parse_pubkey))]
-        treasury: AccountId,
+        validator_aura: AuraId,
+        #[structopt(parse(try_from_str = parse_accountid32))]
+        root_key: AccountId32,
+        #[structopt(parse(try_from_str = parse_accountid32))]
+        treasury: AccountId32,
     },
     /// Outputs the chainspec for a testnet with Alice as validator, root, and treasury
     Ved,
@@ -35,37 +36,44 @@ impl Chain {
         match self {
             Chain::Custom {
                 validator_grandpa,
-                validator_babe,
+                validator_aura,
                 root_key,
                 treasury,
-            } => ChainSpec::from_genesis(
-                "Substrate Warmup Custom Testnet",
-                "substrate-warmup-custom",
-                testnet_genesis(
-                    (validator_grandpa.clone(), validator_babe.clone()),
-                    root_key.clone(),
-                    treasury.clone(),
-                ),
-                vec![],
-                None,
-                Some(&format!(
+            } => {
+                let protocol_id: String = format!(
                     "substrate-warmup-custom-{}-{}-{}-{}",
-                    validator_grandpa, validator_babe, root_key, treasury
-                )),
-                None,
-                None,
-            ),
+                    &validator_grandpa, &validator_aura, &root_key, &treasury
+                );
+                ChainSpec::from_genesis(
+                    "Substrate Warmup Custom Testnet",
+                    "substrate-warmup-custom",
+                    move || {
+                        testnet_genesis(
+                            (validator_grandpa.clone(), validator_aura.clone()),
+                            root_key.clone(),
+                            treasury.clone(),
+                        )
+                    },
+                    vec![],
+                    None,
+                    Some(&protocol_id),
+                    None,
+                    None,
+                )
+            }
             Chain::Ved => ChainSpec::from_genesis(
                 "Substrate Warmup Local Dev Testnet",
                 "substrate-warmup-local",
-                testnet_genesis(
-                    (
-                        get_from_seed::<GrandpaId>("Alice"),
-                        get_from_seed::<BabeId>("Alice"),
-                    ),
-                    get_from_seed::<AccountId>("Alice"),
-                    get_from_seed::<AccountId>("Alice"),
-                ),
+                || {
+                    testnet_genesis(
+                        (
+                            get_from_seed::<GrandpaId>("Alice"),
+                            get_from_seed::<AuraId>("Alice"),
+                        ),
+                        id32_from_sr_seed("Alice"),
+                        id32_from_sr_seed("Alice"),
+                    )
+                },
                 vec![],
                 None,
                 None,
@@ -77,9 +85,9 @@ impl Chain {
 }
 
 fn testnet_genesis(
-    initial_authority: (GrandpaId, BabeId),
-    root_key: AccountId,
-    treasury: AccountId,
+    initial_authority: (GrandpaId, AuraId),
+    root_key: AccountId32,
+    treasury: AccountId32,
 ) -> GenesisConfig {
     const ENDOWMENT: u128 = u128::max_value();
 
@@ -88,16 +96,13 @@ fn testnet_genesis(
             code: WASM_BINARY.to_vec(),
             changes_trie_config: Default::default(),
         }),
-        indices: Some(IndicesConfig {
-            ids: vec![treasury.clone()],
-        }),
         balances: Some(BalancesConfig {
             balances: vec![(treasury.clone(), ENDOWMENT)],
             vesting: vec![],
         }),
         sudo: Some(SudoConfig { key: root_key }),
-        babe: Some(BabeConfig {
-            authorities: vec![(initial_authority.1, 1)],
+        aura: Some(AuraConfig {
+            authorities: vec![initial_authority.1],
         }),
         grandpa: Some(GrandpaConfig {
             authorities: vec![(initial_authority.0, 1)],
@@ -132,7 +137,31 @@ pub fn get_from_seed<P: Public>(seed: &str) -> <P::Pair as Pair>::Public {
         .public()
 }
 
+/// Derive sr25519 key from private key seed, return corresponding publik key as
+/// an AccountId32.
+fn id32_from_sr_seed(seed: &str) -> AccountId32 {
+    AccountId32::from(get_from_seed::<sr25519::Public>(seed).0)
+}
+
+/// convert a 0x prefixed hex string to a 32 byte public key
 fn parse_pubkey<T: Public>(imp: &str) -> Result<T, &'static str> {
+    Ok(Public::from_slice(&parse_key_256(imp)?))
+}
+
+/// convert a 0x prefixed hex string to an AccountId32
+fn parse_accountid32(imp: &str) -> Result<AccountId32, &'static str> {
+    parse_key_256(imp).map(Into::into)
+}
+
+/// panics if slice is wrong length
+fn slice_to_arr32<T: Default + Copy>(src: &[T]) -> [T; 32] {
+    let mut ret: [T; 32] = Default::default();
+    ret.copy_from_slice(src);
+    ret
+}
+
+/// parse a 256 bit, 32 byte key from a 0x prefixed hex string
+fn parse_key_256(imp: &str) -> Result<[u8; 32], &'static str> {
     let imp: &[u8] = imp.as_bytes();
 
     // check key is 0x prefixed, remove prefix
@@ -159,19 +188,22 @@ fn parse_pubkey<T: Public>(imp: &str) -> Result<T, &'static str> {
 
     assert_eq!(pk.len(), 32);
 
-    Ok(Public::from_slice(&pk))
+    Ok(slice_to_arr32(&pk))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use node_template_runtime::Runtime;
 
     #[test]
     fn t_parse_pk() {
         let valid_pk = "0x6e4e511be3eae0696f542e7c05f99e5f5e7b19ce311fc8ef7c2139e0505c305c";
         parse_pubkey::<GrandpaId>(valid_pk).unwrap();
-        parse_pubkey::<BabeId>(valid_pk).unwrap();
-        parse_pubkey::<AccountId>(valid_pk).unwrap();
+        parse_pubkey::<AuraId>(valid_pk).unwrap();
+        parse_pubkey::<sr25519::Public>(valid_pk).unwrap();
+        parse_accountid32(valid_pk).unwrap();
+
         for invalid_pk in &[
             "0x6e4e511be3eae0696f542e7c05f99e5f5e7b19ce311fc8ef7c2139e0505c305",
             "6e4e511be3eae0696f542e7c05f99e5f5e7b19ce311fc8ef7c2139e0505c305c",
@@ -183,8 +215,9 @@ mod tests {
             "wet comic voice screen voyage hobby target prevent cluster moral menu mammal",
         ] {
             parse_pubkey::<GrandpaId>(invalid_pk).unwrap_err();
-            parse_pubkey::<BabeId>(invalid_pk).unwrap_err();
-            parse_pubkey::<AccountId>(invalid_pk).unwrap_err();
+            parse_pubkey::<AuraId>(invalid_pk).unwrap_err();
+            parse_pubkey::<sr25519::Public>(invalid_pk).unwrap_err();
+            parse_accountid32(invalid_pk).unwrap_err();
         }
     }
 
@@ -196,14 +229,14 @@ mod tests {
         for chain in &[
             Chain::Custom {
                 validator_grandpa: parse_pubkey::<GrandpaId>(valid_pk).unwrap(),
-                validator_babe: parse_pubkey::<BabeId>(valid_pk).unwrap(),
-                root_key: parse_pubkey::<AccountId>(valid_pk).unwrap(),
-                treasury: parse_pubkey::<AccountId>(valid_pk).unwrap(),
+                validator_aura: parse_pubkey::<AuraId>(valid_pk).unwrap(),
+                root_key: parse_accountid32(valid_pk).unwrap(),
+                treasury: parse_accountid32(valid_pk).unwrap(),
             },
             Chain::Ved,
         ] {
-            chain.clone().generate().into_json(true).unwrap();
-            chain.clone().generate().into_json(false).unwrap();
+            chain.clone().generate().to_json(true).unwrap();
+            chain.clone().generate().to_json(false).unwrap();
         }
     }
 
@@ -213,9 +246,9 @@ mod tests {
 
         let genesis = Chain::Custom {
             validator_grandpa: parse_pubkey::<GrandpaId>(valid_pk).unwrap(),
-            validator_babe: parse_pubkey::<BabeId>(valid_pk).unwrap(),
-            root_key: parse_pubkey::<AccountId>(valid_pk).unwrap(),
-            treasury: parse_pubkey::<AccountId>(valid_pk).unwrap(),
+            validator_aura: parse_pubkey::<AuraId>(valid_pk).unwrap(),
+            root_key: parse_accountid32(valid_pk).unwrap(),
+            treasury: parse_accountid32(valid_pk).unwrap(),
         }
         .generate();
         let prot_id = genesis.protocol_id().unwrap();
@@ -226,6 +259,15 @@ mod tests {
              5EZLPYKPLdfHutUAxx7hYVqwxmtjcw6MrtNygajayUDQzoSM-\
              5EZLPYKPLdfHutUAxx7hYVqwxmtjcw6MrtNygajayUDQzoSM-\
              5EZLPYKPLdfHutUAxx7hYVqwxmtjcw6MrtNygajayUDQzoSM"
+        );
+    }
+
+    #[test]
+    fn account_id_is_system_account_id() {
+        use std::any::TypeId;
+        assert_eq!(
+            TypeId::of::<<Runtime as srml_system::Trait>::AccountId>(),
+            TypeId::of::<AccountId32>()
         );
     }
 }

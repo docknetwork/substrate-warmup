@@ -1,16 +1,16 @@
-use codec::{Decode, Encode};
+use codec::FullCodec;
 use core::fmt::Debug;
 use rstd::prelude::*;
 use sr_primitives::traits::{CheckedAdd, CheckedSub, SimpleArithmetic};
-use support::{decl_event, decl_module, decl_storage, dispatch::Result, StorageMap};
+use support::{decl_event, decl_module, decl_storage, dispatch::Result};
 use system::{self, ensure_signed};
 
 pub trait Trait: system::Trait {
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
     /// Numerical type for storing balance
-    type TokenBalance: Debug + SimpleArithmetic + Encode + Decode + Default + Copy;
+    type TokenBalance: Debug + SimpleArithmetic + FullCodec + Default + Copy;
     /// Token id
-    type Discriminant: Debug + PartialEq + Encode + Decode + Copy + Default;
+    type Discriminant: Debug + PartialEq + FullCodec + Copy + Default;
 }
 
 // public interface for this runtime module
@@ -76,9 +76,8 @@ decl_event!(
 #[cfg(test)]
 mod test {
     use super::*;
-
-    use primitives::{Blake2Hasher, H256};
-    use runtime_io::with_externalities;
+    use codec::{Decode, Encode};
+    use primitives::H256;
     use sr_primitives::weights::Weight;
     use sr_primitives::Perbill;
     use sr_primitives::{
@@ -112,7 +111,6 @@ mod test {
         type AccountId = u64;
         type Lookup = IdentityLookup<Self::AccountId>;
         type Header = Header;
-        type WeightMultiplierUpdate = ();
         type Event = ();
         type BlockHashCount = BlockHashCount;
         type MaximumBlockWeight = MaximumBlockWeight;
@@ -146,7 +144,7 @@ mod test {
 
     // This function basically just builds a genesis storage key/value store according to
     // our desired mockup.
-    fn new_test_ext() -> runtime_io::TestExternalities<Blake2Hasher> {
+    fn new_test_ext() -> runtime_io::TestExternalities {
         system::GenesisConfig::default()
             .build_storage::<Test>()
             .unwrap()
@@ -161,7 +159,7 @@ mod test {
     /// send tokens from A to B
     #[test]
     fn xfer() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             cheat_in(A, TokenType::A, 10);
 
             // transfer to B
@@ -177,7 +175,7 @@ mod test {
 
     #[test]
     fn cheat_in_meta() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 0);
             assert_eq!(TemplateModule::balance_of((TokenType::B, A)), 0);
             cheat_in(A, TokenType::A, 10);
@@ -191,7 +189,7 @@ mod test {
 
     #[test]
     fn transfer_pong() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             cheat_in(A, TokenType::A, 10);
             assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
             assert_eq!(TemplateModule::balance_of((TokenType::A, B)), 0);
@@ -212,7 +210,7 @@ mod test {
 
     #[test]
     fn transfer_before_create() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 1).unwrap_err();
             TemplateModule::transfer(Origin::signed(B), A, TokenType::A, 1).unwrap_err();
             TemplateModule::transfer(Origin::signed(A), B, TokenType::B, 1).unwrap_err();
@@ -221,7 +219,7 @@ mod test {
 
     #[test]
     fn transfer_none() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             cheat_in(A, TokenType::A, 10);
             TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 0).unwrap();
         });
@@ -229,7 +227,7 @@ mod test {
 
     #[test]
     fn transfer_twice() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             cheat_in(A, TokenType::A, 10);
             TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 5).unwrap();
             TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 5).unwrap();
@@ -239,7 +237,7 @@ mod test {
 
     #[test]
     fn transfer_overflow() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             cheat_in(A, TokenType::A, u128::max_value());
             TemplateModule::transfer(Origin::signed(A), B, TokenType::A, u128::max_value())
                 .unwrap();
@@ -253,7 +251,7 @@ mod test {
 
     #[test]
     fn transfer_too_much() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             cheat_in(A, TokenType::A, 10);
             TemplateModule::transfer(Origin::signed(A), B, TokenType::A, 11).unwrap_err();
             assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
@@ -263,7 +261,7 @@ mod test {
 
     #[test]
     fn transfer_to_self() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             cheat_in(A, TokenType::A, 10);
             TemplateModule::transfer(Origin::signed(A), A, TokenType::A, 10).unwrap();
             assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
@@ -272,7 +270,7 @@ mod test {
 
     #[test]
     fn transfer_too_much_to_self() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             cheat_in(A, TokenType::A, 10);
             TemplateModule::transfer(Origin::signed(A), A, TokenType::A, 11).unwrap_err();
             assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
@@ -281,7 +279,7 @@ mod test {
 
     #[test]
     fn transfer_zero_to_self() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             cheat_in(A, TokenType::A, 10);
             TemplateModule::transfer(Origin::signed(A), A, TokenType::A, 0).unwrap();
             assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 10);
@@ -290,7 +288,7 @@ mod test {
 
     #[test]
     fn default_balance_zero() {
-        with_externalities(&mut new_test_ext(), || {
+        new_test_ext().execute_with(|| {
             assert_eq!(TemplateModule::balance_of((TokenType::A, A)), 0);
             assert_eq!(TemplateModule::balance_of((TokenType::A, B)), 0);
             assert_eq!(TemplateModule::balance_of((TokenType::A, C)), 0);

@@ -29,11 +29,12 @@ extern crate srml_support as runtime_support;
 extern crate srml_system as system;
 extern crate substrate_primitives as primitives;
 
-use rstd::prelude::*;
+extern crate alloc;
+
+use alloc::{vec, vec::Vec};
 use rstd::result;
 use runtime_primitives::traits::Hash;
 use runtime_support::dispatch::Result;
-use runtime_support::{StorageMap, StorageValue};
 use system::ensure_signed;
 
 use codec::{Decode, Encode};
@@ -41,8 +42,7 @@ use codec::{Decode, Encode};
 /// A potential outcome of a vote, with 2^32 possible options
 pub type VoteOutcome = [u8; 32];
 
-#[cfg_attr(feature = "std", derive(Debug))]
-#[derive(Encode, Decode, Copy, Clone, Eq, PartialEq)]
+#[derive(Encode, Decode, Copy, Clone, Eq, PartialEq, core::fmt::Debug)]
 pub enum VoteStage {
     // Before voting stage, no votes accepted
     PreVoting,
@@ -54,8 +54,7 @@ pub enum VoteStage {
     Completed,
 }
 
-#[cfg_attr(feature = "std", derive(Debug))]
-#[derive(Encode, Decode, Copy, Clone, Eq, PartialEq)]
+#[derive(Encode, Decode, Copy, Clone, Eq, PartialEq, core::fmt::Debug)]
 pub enum VoteType {
     // Binary decision vote, i.e. 2 outcomes
     Binary,
@@ -65,8 +64,7 @@ pub enum VoteType {
     RankedChoice,
 }
 
-#[cfg_attr(feature = "std", derive(Debug))]
-#[derive(Encode, Decode, Copy, Clone, Eq, PartialEq)]
+#[derive(Encode, Decode, Copy, Clone, Eq, PartialEq, core::fmt::Debug)]
 pub enum TallyType {
     // 1 person 1 vote, i.e. 1 account 1 vote
     OnePerson,
@@ -74,8 +72,7 @@ pub enum TallyType {
     OneCoin,
 }
 
-#[cfg_attr(feature = "std", derive(Debug))]
-#[derive(Encode, Decode, PartialEq)]
+#[derive(Encode, Decode, PartialEq, core::fmt::Debug)]
 pub struct VoteData<AccountId> {
     // creator of vote
     pub initiator: AccountId,
@@ -89,8 +86,7 @@ pub struct VoteData<AccountId> {
     pub is_commit_reveal: bool,
 }
 
-#[cfg_attr(feature = "std", derive(Debug))]
-#[derive(Encode, Decode, PartialEq)]
+#[derive(Encode, Decode, PartialEq, core::fmt::Debug)]
 pub struct VoteRecord<AccountId> {
     // Identifier of the vote
     pub id: u64,

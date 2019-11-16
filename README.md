@@ -33,12 +33,9 @@ rustup toolchain add nightly
 # wasm32-unknown-unknown target
 rustup target add wasm32-unknown-unknown --toolchain nightly
 
-# wasm-gc
-cargo +nightly install --git https://github.com/alexcrichton/wasm-gc --force
-
 # substrate
 git clone https://github.com/paritytech/substrate.git
-(cd substrate; git checkout 870b976bec729aaf26cc237df9fd764b8f7b9d7e) # our current pinned version
+(cd substrate; git checkout aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc) # our current pinned version
 cargo install --path substrate --force
 ```
 
