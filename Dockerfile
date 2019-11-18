@@ -45,7 +45,7 @@
 
 # -------------- Build chainspec ---------------- #
 
-from parity/rust-builder:e015528d-20191003 as chainspec-builder
+from parity/rust-builder:d53c78d1-20191118 as chainspec-builder
 
 copy . project
 workdir project
@@ -71,18 +71,30 @@ run if [ "x${chain_generator_args}" = "xhelp" ] \
 
 run cargo run --release --offline -- $chain_generator_args > /chainspec.json
 
+# -------------- Build substrate ---------------- #
+
+from parity/rust-builder:d53c78d1-20191118 as substrate-builder
+
+workdir /
+run git clone https://github.com/paritytech/substrate.git
+workdir substrate
+
+run git checkout aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc; cargo fetch
+run cargo build --release --bin substrate --offline
+
 # -------------------- Run ---------------------- #
 
-from parity/substrate:2.0.0-aa937d9b4
+from debian:stretch-slim
 
 copy --from=chainspec-builder /chainspec.json /chainspec.json
+copy --from=substrate-builder /substrate/target/release/substrate /substrate
 
-entrypoint [                    \
-    "/usr/local/bin/substrate", \
-	"--rpc-cors",               \
-	"all",                      \
-	"--rpc-external",           \
-	"--ws-external",            \
-	"--chain",                  \
-	"/chainspec.json"           \
+entrypoint [          \
+	"/substrate",     \
+	"--rpc-cors",     \
+	"all",            \
+	"--rpc-external", \
+	"--ws-external",  \
+	"--chain",        \
+	"/chainspec.json" \
 ]

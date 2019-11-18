@@ -36,7 +36,7 @@ rustup target add wasm32-unknown-unknown --toolchain nightly
 # substrate
 git clone https://github.com/paritytech/substrate.git
 (cd substrate; git checkout aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc) # our current pinned version
-cargo install --path substrate --force
+cargo install --path substrate/node/cli --force --bin substrate
 ```
 
 ## Run
