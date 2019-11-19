@@ -11,7 +11,6 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 extern crate alloc;
 
 use alloc::vec::Vec;
-use aura_primitives::sr25519::AuthorityId as AuraId;
 use grandpa::fg_primitives;
 use grandpa::AuthorityList as GrandpaAuthorityList;
 use primitives::OpaqueMetadata;
@@ -57,7 +56,7 @@ mod opaque {
 
     impl_opaque_keys! {
         pub struct SessionKeys {
-            pub aura: Aura,
+            pub babe: Babe,
             pub grandpa: Grandpa,
         }
     }
@@ -136,25 +135,20 @@ impl system::Trait for Runtime {
     type Version = Version;
 }
 
-impl aura::Trait for Runtime {
-    type AuthorityId = AuraId;
+parameter_types! {
+    pub const EpochDuration: u64 = 100;
+    pub const ExpectedBlockTime: u64 = MILLISECS_PER_BLOCK;
+}
+
+impl babe::Trait for Runtime {
+    type EpochDuration = EpochDuration;
+    type ExpectedBlockTime = ExpectedBlockTime;
+    type EpochChangeTrigger = babe::ExternalTrigger;
 }
 
 impl grandpa::Trait for Runtime {
     type Event = Event;
 }
-
-// impl indices::Trait for Runtime {
-//     /// The type for recording indexing into the account enumeration. If this ever overflows, there
-//     /// will be problems!
-//     type AccountIndex = u32;
-//     /// Use the standard means of resolving an index hint from an id.
-//     type ResolveHint = indices::SimpleResolveHint<Self::AccountId, Self::AccountIndex>;
-//     /// Determine whether an account is dead.
-//     type IsDeadAccount = Balances;
-//     /// The ubiquitous event type.
-//     type Event = Event;
-// }
 
 parameter_types! {
     pub const MinimumPeriod: u64 = SLOT_DURATION / 2;
@@ -163,7 +157,7 @@ parameter_types! {
 impl timestamp::Trait for Runtime {
     /// A timestamp: milliseconds since the unix epoch.
     type Moment = u64;
-    type OnTimestampSet = Aura;
+    type OnTimestampSet = Babe;
     type MinimumPeriod = MinimumPeriod;
 }
 
@@ -225,7 +219,7 @@ construct_runtime!(
     {
         System: system::{Module, Call, Storage, Config, Event},
         Timestamp: timestamp::{Module, Call, Storage, Inherent},
-        Aura: aura::{Module, Config<T>, Inherent(Timestamp)},
+		Babe: babe::{Module, Call, Storage, Config, Inherent(Timestamp)},
         Grandpa: grandpa::{Module, Call, Storage, Config, Event},
         // Indices: indices::{default, Config<T>},
         Balances: balances::{default, Error},
@@ -319,13 +313,18 @@ impl_runtime_apis! {
         }
     }
 
-    impl aura_primitives::AuraApi<Block, AuraId> for Runtime {
-        fn slot_duration() -> u64 {
-            Aura::slot_duration()
-        }
-
-        fn authorities() -> Vec<AuraId> {
-            Aura::authorities()
+    impl babe_primitives::BabeApi<Block> for Runtime {
+        fn configuration() -> babe_primitives::BabeConfiguration {
+            // <https://research.web3.foundation/en/latest/polkadot/BABE/Babe/#6-practical-results>
+            babe_primitives::BabeConfiguration {
+                slot_duration: Babe::slot_duration(),
+                epoch_length: EpochDuration::get(),
+                // 1 in 4 blocks (on average, not counting collisions) will be primary BABE blocks.
+                c: (1, 4),
+                genesis_authorities: Babe::authorities(),
+                randomness: Babe::randomness(),
+                secondary_slots: true,
+            }
         }
     }
 
