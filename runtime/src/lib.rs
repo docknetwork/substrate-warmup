@@ -136,7 +136,9 @@ impl system::Trait for Runtime {
 }
 
 parameter_types! {
-    pub const EpochDuration: u64 = 100;
+	// effectively infinite. We have one authority, so it doesn't matter whether babe switches.
+	// if this value is set to 100, block production may cease on the 99th block.
+    pub const EpochDuration: u64 = u64::max_value() / 2;
     pub const ExpectedBlockTime: u64 = MILLISECS_PER_BLOCK;
 }
 
