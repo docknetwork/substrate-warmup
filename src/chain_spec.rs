@@ -1,13 +1,13 @@
 use erc20::Erc20Token;
 use node_template_runtime::{
-    AuraConfig, BalancesConfig, Erc20Config, GenesisConfig, GrandpaConfig, SudoConfig,
+    BabeConfig, BalancesConfig, Erc20Config, GenesisConfig, GrandpaConfig, SudoConfig,
     SystemConfig, WASM_BINARY,
 };
 use serde::{Deserialize, Serialize};
 use sr_primitives::AccountId32;
 use structopt::StructOpt;
 use substrate_chain_spec::ChainSpec;
-use substrate_consensus_aura_primitives::sr25519::AuthorityId as AuraId;
+use substrate_consensus_babe_primitives::AuthorityId as BabeId;
 use substrate_finality_grandpa_primitives::AuthorityId as GrandpaId;
 use substrate_primitives::sr25519;
 use substrate_primitives::{Pair, Public};
@@ -20,7 +20,7 @@ pub enum Chain {
         #[structopt(parse(try_from_str = parse_pubkey))]
         validator_grandpa: GrandpaId,
         #[structopt(parse(try_from_str = parse_pubkey))]
-        validator_aura: AuraId,
+        validator_babe: BabeId,
         #[structopt(parse(try_from_str = parse_accountid32))]
         root_key: AccountId32,
         #[structopt(parse(try_from_str = parse_accountid32))]
@@ -36,20 +36,20 @@ impl Chain {
         match self {
             Chain::Custom {
                 validator_grandpa,
-                validator_aura,
+                validator_babe,
                 root_key,
                 treasury,
             } => {
                 let protocol_id: String = format!(
                     "substrate-warmup-custom-{}-{}-{}-{}",
-                    &validator_grandpa, &validator_aura, &root_key, &treasury
+                    &validator_grandpa, &validator_babe, &root_key, &treasury
                 );
                 ChainSpec::from_genesis(
                     "Substrate Warmup Custom Testnet",
                     "substrate-warmup-custom",
                     move || {
                         testnet_genesis(
-                            (validator_grandpa.clone(), validator_aura.clone()),
+                            (validator_grandpa.clone(), validator_babe.clone()),
                             root_key.clone(),
                             treasury.clone(),
                         )
@@ -68,7 +68,7 @@ impl Chain {
                     testnet_genesis(
                         (
                             get_from_seed::<GrandpaId>("Alice"),
-                            get_from_seed::<AuraId>("Alice"),
+                            get_from_seed::<BabeId>("Alice"),
                         ),
                         id32_from_sr_seed("Alice"),
                         id32_from_sr_seed("Alice"),
@@ -85,7 +85,7 @@ impl Chain {
 }
 
 fn testnet_genesis(
-    initial_authority: (GrandpaId, AuraId),
+    initial_authority: (GrandpaId, BabeId),
     root_key: AccountId32,
     treasury: AccountId32,
 ) -> GenesisConfig {
@@ -101,8 +101,8 @@ fn testnet_genesis(
             vesting: vec![],
         }),
         sudo: Some(SudoConfig { key: root_key }),
-        aura: Some(AuraConfig {
-            authorities: vec![initial_authority.1],
+        babe: Some(BabeConfig {
+            authorities: vec![(initial_authority.1, 1)],
         }),
         grandpa: Some(GrandpaConfig {
             authorities: vec![(initial_authority.0, 1)],
@@ -200,7 +200,7 @@ mod tests {
     fn t_parse_pk() {
         let valid_pk = "0x6e4e511be3eae0696f542e7c05f99e5f5e7b19ce311fc8ef7c2139e0505c305c";
         parse_pubkey::<GrandpaId>(valid_pk).unwrap();
-        parse_pubkey::<AuraId>(valid_pk).unwrap();
+        parse_pubkey::<BabeId>(valid_pk).unwrap();
         parse_pubkey::<sr25519::Public>(valid_pk).unwrap();
         parse_accountid32(valid_pk).unwrap();
 
@@ -215,7 +215,7 @@ mod tests {
             "wet comic voice screen voyage hobby target prevent cluster moral menu mammal",
         ] {
             parse_pubkey::<GrandpaId>(invalid_pk).unwrap_err();
-            parse_pubkey::<AuraId>(invalid_pk).unwrap_err();
+            parse_pubkey::<BabeId>(invalid_pk).unwrap_err();
             parse_pubkey::<sr25519::Public>(invalid_pk).unwrap_err();
             parse_accountid32(invalid_pk).unwrap_err();
         }
@@ -229,7 +229,7 @@ mod tests {
         for chain in &[
             Chain::Custom {
                 validator_grandpa: parse_pubkey::<GrandpaId>(valid_pk).unwrap(),
-                validator_aura: parse_pubkey::<AuraId>(valid_pk).unwrap(),
+                validator_babe: parse_pubkey::<BabeId>(valid_pk).unwrap(),
                 root_key: parse_accountid32(valid_pk).unwrap(),
                 treasury: parse_accountid32(valid_pk).unwrap(),
             },
@@ -246,7 +246,7 @@ mod tests {
 
         let genesis = Chain::Custom {
             validator_grandpa: parse_pubkey::<GrandpaId>(valid_pk).unwrap(),
-            validator_aura: parse_pubkey::<AuraId>(valid_pk).unwrap(),
+            validator_babe: parse_pubkey::<BabeId>(valid_pk).unwrap(),
             root_key: parse_accountid32(valid_pk).unwrap(),
             treasury: parse_accountid32(valid_pk).unwrap(),
         }

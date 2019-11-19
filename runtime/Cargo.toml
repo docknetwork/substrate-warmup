@@ -14,8 +14,8 @@ support = { version = "2", package = "srml-support", default_features = false }
 primitives = { version = "2", package = "substrate-primitives", default_features = false }
 substrate-session = { version = "2", default-features = false }
 balances = { version = "2", package = "srml-balances", default_features = false }
-aura = { version = "2", package = "srml-aura", default_features = false }
-aura-primitives = { version = "2", package = "substrate-consensus-aura-primitives", default_features = false }
+babe = { version = "2", package = "srml-babe", default_features = false }
+babe-primitives = { version = "2", package = "substrate-consensus-babe-primitives", default_features = false }
 grandpa = { version = "2", package = "srml-grandpa", default_features = false }
 executive = { version = "2", package = "srml-executive", default_features = false }
 indices = { version = "2", package = "srml-indices", default_features = false }
@@ -44,8 +44,8 @@ std = [
 	"runtime-io/std",
 	"support/std",
 	"balances/std",
-	"aura/std",
-	"aura-primitives/std",
+	"babe/std",
+	"babe-primitives/std",
 	"grandpa/std",
 	"executive/std",
 	"indices/std",

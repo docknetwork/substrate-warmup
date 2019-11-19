@@ -2091,7 +2091,7 @@ dependencies = [
  "sr-io 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "sr-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "sr-version 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "srml-aura 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
+ "srml-babe 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "srml-balances 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "srml-executive 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "srml-grandpa 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
@@ -2103,7 +2103,7 @@ dependencies = [
  "srml-timestamp 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "srml-transaction-payment 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "substrate-block-builder-runtime-api 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "substrate-consensus-aura-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
+ "substrate-consensus-babe-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "substrate-inherents 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "substrate-offchain-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "substrate-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
@@ -3196,26 +3196,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "srml-aura"
-version = "2.0.0"
-source = "git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc#aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc"
-dependencies = [
- "parity-scale-codec 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde 1.0.102 (registry+https://github.com/rust-lang/crates.io-index)",
- "sr-io 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "sr-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "sr-std 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "srml-session 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "srml-support 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "srml-system 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "srml-timestamp 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "substrate-application-crypto 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "substrate-consensus-aura-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "substrate-inherents 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "substrate-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
-]
-
-[[package]]
 name = "srml-babe"
 version = "2.0.0"
 source = "git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc#aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc"
@@ -3677,18 +3657,6 @@ dependencies = [
  "substrate-state-db 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "substrate-state-machine 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "substrate-trie 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
-]
-
-[[package]]
-name = "substrate-consensus-aura-primitives"
-version = "2.0.0"
-source = "git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc#aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc"
-dependencies = [
- "parity-scale-codec 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sr-api 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "sr-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "sr-std 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "substrate-application-crypto 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
 ]
 
 [[package]]
@@ -4283,7 +4251,7 @@ dependencies = [
  "srml-system 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "structopt 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "substrate-chain-spec 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
- "substrate-consensus-aura-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
+ "substrate-consensus-babe-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "substrate-finality-grandpa-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "substrate-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
  "substrate-service 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)",
@@ -5443,7 +5411,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum sr-staking-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"
 "checksum sr-std 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"
 "checksum sr-version 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"
-"checksum srml-aura 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"
 "checksum srml-babe 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"
 "checksum srml-balances 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"
 "checksum srml-executive 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"
@@ -5479,7 +5446,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum substrate-chain-spec-derive 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"
 "checksum substrate-client 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"
 "checksum substrate-client-db 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"
-"checksum substrate-consensus-aura-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"
 "checksum substrate-consensus-babe-primitives 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"
 "checksum substrate-consensus-common 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"
 "checksum substrate-consensus-slots 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc)" = "<none>"

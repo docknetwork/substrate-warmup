@@ -13,7 +13,7 @@ structopt = { version = "0.3.2", features = ["paw"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 substrate-chain-spec = "2"
-substrate-consensus-aura-primitives = "2"
+substrate-consensus-babe-primitives = "2"
 substrate-finality-grandpa-primitives = "2"
 substrate-primitives = "2"
 substrate-service = "2"
@@ -73,7 +73,7 @@ sr-staking-primitives = { git = "https://github.com/paritytech/substrate.git", r
 sr-std = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 sr-version = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 # srml-assets = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
-srml-aura = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
+# srml-aura = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 # srml-authority-discovery = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 # srml-authorship = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 srml-babe = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
@@ -132,7 +132,7 @@ substrate-chain-spec = { git = "https://github.com/paritytech/substrate.git", re
 substrate-client = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 substrate-client-db = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 # substrate-consensus-aura = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
-substrate-consensus-aura-primitives = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
+# substrate-consensus-aura-primitives = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 # substrate-consensus-babe = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 substrate-consensus-babe-primitives = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 # substrate-consensus-common = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }

@@ -43,6 +43,17 @@
 #     --chain /chainspec.json                # <- Don't forget the chainspec path. Otherwise the
 #                                            #    container will run the wrong chain.
 
+# -------------- Build substrate ---------------- #
+
+from parity/rust-builder:d53c78d1-20191118 as substrate-builder
+
+workdir /
+run git clone https://github.com/paritytech/substrate.git
+workdir substrate
+
+run git checkout aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc; cargo fetch
+run cargo build --release --bin substrate --offline
+
 # -------------- Build chainspec ---------------- #
 
 from parity/rust-builder:d53c78d1-20191118 as chainspec-builder
@@ -70,17 +81,6 @@ run if [ "x${chain_generator_args}" = "xhelp" ] \
 	; fi
 
 run cargo run --release --offline -- $chain_generator_args > /chainspec.json
-
-# -------------- Build substrate ---------------- #
-
-from parity/rust-builder:d53c78d1-20191118 as substrate-builder
-
-workdir /
-run git clone https://github.com/paritytech/substrate.git
-workdir substrate
-
-run git checkout aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc; cargo fetch
-run cargo build --release --bin substrate --offline
 
 # -------------------- Run ---------------------- #
 
