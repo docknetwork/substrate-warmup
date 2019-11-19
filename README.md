@@ -71,6 +71,8 @@ substrate --chain ./tmp/chainspec.json --alice --base-path ./tmp
 
 # Using the polkadot js UI
 
+[transactions from Alice are currently broken](https://github.com/docknetwork/substrate-warmup/issues/47)
+
 Once the dev chain is running, natively; within docker; or through docker-compose, you can interact
 with it via browser.
 
