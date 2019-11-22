@@ -50,10 +50,10 @@ async fn amain(args: Args) -> Result<Value, RpcError> {
 async fn do_action(cl: StateClient<BlockHash>, act: Action) -> Result<Option<Value>, RpcError> {
     match act {
         Action::Read(key) => {
-            let raw_key = key.as_raw_key();
+            let raw_key = key.to_raw_key();
             let raw_value_opt: Option<StorageData> = cl.storage(raw_key, None).compat().await?;
             raw_value_opt
-                .map(|raw_value| key.result_scale_to_json(raw_value))
+                .map(|raw_value| key.raw_scale_to_json(raw_value))
                 .transpose()
                 .map_err(|e| RpcError::Other(e.into()))
         }
