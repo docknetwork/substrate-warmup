@@ -1,10 +1,10 @@
 use super::augment_clap::AugmentClap;
+use super::Json;
 use crate::storage_query::StorageQuery;
 use core::fmt::Debug;
 use core::marker::PhantomData;
 use parity_scale_codec::FullCodec;
 use serde::Serialize;
-use serde_json::Value;
 use srml_support::storage::generator::StorageValue;
 use structopt::clap::{App, ArgMatches};
 use structopt::StructOpt;
@@ -25,7 +25,7 @@ impl<S: StorageValue<V>, V: FullCodec + Serialize> StorageQuery for ValueQuery<S
         StorageKey(S::storage_value_final_key().to_vec())
     }
 
-    fn raw_scale_to_json(&self, raw: StorageData) -> Result<Value, parity_scale_codec::Error> {
+    fn raw_scale_to_json(&self, raw: StorageData) -> Result<Json, parity_scale_codec::Error> {
         super::raw_scale_to_json::<V>(raw)
     }
 }

@@ -1,8 +1,8 @@
+use crate::json::Json;
 use crate::storage_query::{AugmentClap, MapQuery, StorageQuery, ValueQuery};
 use core::fmt::Debug;
 use core::ops::Deref;
 use node_template_runtime::Runtime;
-use serde_json::Value;
 use structopt::StructOpt;
 use substrate_primitives_storage::{StorageData, StorageKey};
 // use substrate_warmup_common::parse_accountid32;
@@ -40,7 +40,7 @@ impl StorageQuery for Key {
         self.deref().to_raw_key()
     }
 
-    fn raw_scale_to_json(&self, encoded: StorageData) -> Result<Value, parity_scale_codec::Error> {
+    fn raw_scale_to_json(&self, encoded: StorageData) -> Result<Json, parity_scale_codec::Error> {
         self.deref().raw_scale_to_json(encoded)
     }
 }
