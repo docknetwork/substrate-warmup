@@ -6,7 +6,6 @@ edition = "2018"
 
 [dependencies]
 erc20 = { path = "modules/erc20" }
-hex = "0.4.0"
 node-template-runtime = { path = "runtime" }
 paw = "1.0.0"
 structopt = { version = "0.3.2", features = ["paw"] }
@@ -18,11 +17,14 @@ substrate-finality-grandpa-primitives = "2"
 substrate-primitives = "2"
 substrate-service = "2"
 substrate-telemetry = "2"
+substrate-warmup-common = { path = "common" }
 sr-primitives = "2"
 srml-system = "2"
 
 [workspace]
 members = [
+    "client",
+    "common",
     "runtime",
     "modules/multi-token",
     "modules/voting",
@@ -107,7 +109,7 @@ srml-support = { git = "https://github.com/paritytech/substrate.git", rev = "aa9
 srml-support-procedural = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 srml-support-procedural-tools = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 srml-support-procedural-tools-derive = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
-# srml-support-rpc = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
+srml-support-rpc = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 # srml-support-test = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 srml-system = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 # srml-system-rpc = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
@@ -159,7 +161,7 @@ substrate-peerset = { git = "https://github.com/paritytech/substrate.git", rev =
 substrate-primitives = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 substrate-primitives-storage = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 # substrate-rpc = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
-# substrate-rpc-api = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
+substrate-rpc-api = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 # substrate-rpc-primitives = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 # substrate-rpc-servers = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }
 substrate-runtime-interface = { git = "https://github.com/paritytech/substrate.git", rev = "aa937d9b4e5767f224cf9d5dfbd9a537e97efcfc" }

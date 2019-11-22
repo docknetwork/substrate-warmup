@@ -5,4 +5,7 @@ mod erc20;
 #[cfg(feature = "std")]
 pub use crate::erc20::GenesisConfig;
 
-pub use crate::erc20::{Erc20Token, Event, Module, Trait, __InherentHiddenInstance};
+pub use crate::erc20::{
+    Allowance, BalanceOf, Erc20Token, Event, Module, TokenId, Tokens, Trait,
+    __InherentHiddenInstance,
+};

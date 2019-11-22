@@ -1,0 +1,10 @@
+[package]
+name = "substrate-warmup-common"
+version = "0.1.0"
+authors = ["Andrew Dirksen <andrew@dirksen.com>"]
+edition = "2018"
+
+[dependencies]
+sr-primitives = "2"
+substrate-primitives = "2"
+hex = "0.4.0"
