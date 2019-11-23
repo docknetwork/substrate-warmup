@@ -13,7 +13,7 @@ pub enum Key {
     /// is a registered token.
     Erc20TokenId(ValueQuery<erc20::TokenId, u32>),
     /// Information about a token that has alerady been minted.
-	/// Takes a numerical token id as an argument.
+    /// Takes a numerical token id as an argument.
     Erc20Token(MapQuery<erc20::Tokens<Runtime>, u32, erc20::Erc20Token<u128>>),
     /// Balance of token for account.
     /// args: `[<token-number>, "ss58address"]`
