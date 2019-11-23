@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -ueo pipefail
+
+cargo build -p substrate-warmup-client --bin substrate-warmup-client
+alias client='./target/debug/substrate-warmup-client ws://127.0.0.1:9944'
+
+client read erc20-token-id
+
+client read erc20-token 0
+client read erc20-token 1
+
+client read erc20-balance-of '[0,"5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"]' # Alice, big number.
+client read erc20-balance-of '[0,"5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"]' # Bob, null balance.
+
+client read erc20-allowance '[
+	  0,
+	  "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+ 	  "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"
+]' # null allowance for Bob

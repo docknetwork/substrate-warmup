@@ -31,7 +31,6 @@ enum Action {
 
 #[paw::main]
 fn main(args: Args) {
-    eprintln!("{:#?}", &args);
     let to_print: Json = tokio::runtime::Runtime::new()
         .unwrap()
         .block_on(Compat::new(amain(args).boxed()))

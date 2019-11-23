@@ -3,9 +3,8 @@ use super::Json;
 use crate::storage_query::StorageQuery;
 use core::fmt::Debug;
 use core::marker::PhantomData;
-use core::str::FromStr;
 use parity_scale_codec::FullCodec;
-use serde::Serialize;
+use serde::{de::DeserializeOwned, Serialize};
 use srml_support::storage::generator::StorageMap;
 use structopt::clap::{self, App, ArgMatches};
 use structopt::StructOpt;
@@ -34,11 +33,7 @@ impl<S: StorageMap<K, V>, K: FullCodec, V: FullCodec + Serialize> StorageQuery
     }
 }
 
-impl<S, K, V> StructOpt for MapQuery<S, K, V>
-where
-    K: FromStr,
-    <K as FromStr>::Err: ToString + Debug,
-{
+impl<S, K: DeserializeOwned, V> StructOpt for MapQuery<S, K, V> {
     fn clap<'a, 'b>() -> App<'a, 'b> {
         Self::augment_clap(App::new(""))
     }
@@ -47,18 +42,14 @@ where
         Self {
             key: matches
                 .value_of("key")
-                .map(|s| ::std::str::FromStr::from_str(s).unwrap())
+                .map(|s| serde_json::from_str(s).unwrap())
                 .unwrap(),
             _spook: PhantomData,
         }
     }
 }
 
-impl<S, K, V> AugmentClap for MapQuery<S, K, V>
-where
-    K: FromStr,
-    <K as FromStr>::Err: ToString,
-{
+impl<S, K: DeserializeOwned, V> AugmentClap for MapQuery<S, K, V> {
     fn augment_clap<'a, 'b>(app: App<'a, 'b>) -> App<'a, 'b> {
         app.arg(
             clap::Arg::with_name("key")
@@ -66,7 +57,7 @@ where
                 .multiple(false)
                 .required(true)
                 .validator(|s| {
-                    ::std::str::FromStr::from_str(s.as_str())
+                    serde_json::from_str(s.as_str())
                         .map(|_: K| ())
                         .map_err(|e| e.to_string())
                 }),
