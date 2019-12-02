@@ -8,6 +8,7 @@ edition = "2018"
 node-template-runtime = { path = "../runtime" }
 substrate-warmup-common = { path = "../common" }
 sr-primitives = "2"
+substrate-primitives = "2"
 srml-support-rpc = "2"
 structopt = { version = "0.3", features = ["paw"] }
 paw = "1"
@@ -23,3 +24,8 @@ url = "2"
 tokio = "0.1"
 futures = { version = "0.3.0", features = ["compat"] }
 erc20 = { path = "../modules/erc20" }
+srml-timestamp = "2"
+srml-babe = "2"
+substrate-consensus-babe-primitives = "2"
+srml-balances = "2"
+voting = { path="../modules/voting" }

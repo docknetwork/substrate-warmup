@@ -1,20 +1,65 @@
 #!/bin/sh
 
-set -ueo pipefail
+set -uexo pipefail
 
 cargo build -p substrate-warmup-client --bin substrate-warmup-client
 alias client='./target/debug/substrate-warmup-client ws://127.0.0.1:9944'
+
+# Erc20 ------------------------------------------------------------------------
 
 client read erc20-token-id
 
 client read erc20-token 0
 client read erc20-token 1
 
-client read erc20-balance-of '[0,"5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"]' # Alice, big number.
-client read erc20-balance-of '[0,"5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"]' # Bob, null balance.
+client read erc20-balance-of '[0, "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"]' # Alice, big number.
+client read erc20-balance-of '[0, "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"]' # Bob, null balance.
 
 client read erc20-allowance '[
-	  0,
-	  "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
- 	  "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"
+    0,
+    "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+    "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"
 ]' # null allowance for Bob
+
+# System -----------------------------------------------------------------------
+
+client read system-account-nonce '"5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"'
+client read system-account-nonce '"5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"'
+
+client read system-block-hash 0 # hash of block 0
+
+# hash of block 1, may be null as historical block hashes are not always stored
+# if a recent block hash was queried, a non-null value would be returned
+client read system-block-hash 1
+
+# null, there is no entry for such and advanced block
+client read system-block-hash 100000000
+
+# TimeStamp --------------------------------------------------------------------
+
+client read timestamp-now
+
+# Babe -------------------------------------------------------------------------
+
+client read babe-epoch-index
+client read babe-authorities
+client read babe-genesis-slot
+client read babe-current-slot
+client read babe-randomness
+
+# Balances ---------------------------------------------------------------------
+
+client read balances-total-issuance
+
+client read balances-free-balance '"5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"' # alice
+client read balances-free-balance '"5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"' # bob
+
+client read balances-reserved-balance '"5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"' # alice
+client read balances-reserved-balance '"5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"' # bob
+
+# Voting -----------------------------------------------------------------------
+
+client read voting-vote-records 0
+client read voting-vote-records 1
+
+client read voting-vote-record-count

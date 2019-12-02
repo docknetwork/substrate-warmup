@@ -43,6 +43,7 @@ use codec::{Decode, Encode};
 pub type VoteOutcome = [u8; 32];
 
 #[derive(Encode, Decode, Copy, Clone, Eq, PartialEq, core::fmt::Debug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum VoteStage {
     // Before voting stage, no votes accepted
     PreVoting,
@@ -55,6 +56,7 @@ pub enum VoteStage {
 }
 
 #[derive(Encode, Decode, Copy, Clone, Eq, PartialEq, core::fmt::Debug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum VoteType {
     // Binary decision vote, i.e. 2 outcomes
     Binary,
@@ -65,6 +67,7 @@ pub enum VoteType {
 }
 
 #[derive(Encode, Decode, Copy, Clone, Eq, PartialEq, core::fmt::Debug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum TallyType {
     // 1 person 1 vote, i.e. 1 account 1 vote
     OnePerson,
@@ -73,6 +76,7 @@ pub enum TallyType {
 }
 
 #[derive(Encode, Decode, PartialEq, core::fmt::Debug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct VoteData<AccountId> {
     // creator of vote
     pub initiator: AccountId,
@@ -87,6 +91,7 @@ pub struct VoteData<AccountId> {
 }
 
 #[derive(Encode, Decode, PartialEq, core::fmt::Debug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct VoteRecord<AccountId> {
     // Identifier of the vote
     pub id: u64,

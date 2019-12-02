@@ -34,7 +34,9 @@ extern crate substrate_primitives as primitives;
 
 pub mod voting;
 pub use crate::voting::{Event, Module, RawEvent, Trait};
-pub use crate::voting::{TallyType, VoteData, VoteRecord, VoteStage, VoteType};
+pub use crate::voting::{
+    TallyType, VoteData, VoteRecord, VoteRecordCount, VoteRecords, VoteStage, VoteType,
+};
 
 #[cfg(test)]
 mod tests {
