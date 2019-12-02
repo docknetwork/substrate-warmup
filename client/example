@@ -2,6 +2,8 @@
 
 set -uexo pipefail
 
+cd "$(dirname $0)"/..
+
 cargo build -p substrate-warmup-client --bin substrate-warmup-client
 alias client='./target/debug/substrate-warmup-client ws://127.0.0.1:9944'
 
