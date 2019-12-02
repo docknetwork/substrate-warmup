@@ -1,0 +1,31 @@
+[package]
+name = "substrate-warmup-client"
+version = "0.1.0"
+authors = ["Andrew Dirksen <andrew@dirksen.com>"]
+edition = "2018"
+
+[dependencies]
+node-template-runtime = { path = "../runtime" }
+substrate-warmup-common = { path = "../common" }
+sr-primitives = "2"
+substrate-primitives = "2"
+srml-support-rpc = "2"
+structopt = { version = "0.3", features = ["paw"] }
+paw = "1"
+serde = "1"
+serde_json = "1"
+jsonrpc-client-transports = "14.0.3"
+substrate-rpc-api = "2"
+parity-scale-codec = "1.1.0"
+srml-system = "2"
+srml-support = "2"
+substrate-primitives-storage = "2"
+url = "2"
+tokio = "0.1"
+futures = { version = "0.3.0", features = ["compat"] }
+erc20 = { path = "../modules/erc20" }
+srml-timestamp = "2"
+srml-babe = "2"
+substrate-consensus-babe-primitives = "2"
+srml-balances = "2"
+voting = { path="../modules/voting" }

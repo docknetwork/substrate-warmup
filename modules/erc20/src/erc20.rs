@@ -116,7 +116,7 @@ decl_storage! {
     trait Store for Module<T: Trait> as Erc20 {
         // token id nonce for storing the next token id available for token initialization
         // inspired by the AssetId in the SRML assets module
-        TokenId get(token_id)
+        pub TokenId get(token_id)
             build(|config: &GenesisConfig<T>| {
                 let len: usize = config.initial_tokens.len();
                 let next_id: u32 = len.try_into().expect("number of tokens was too large");
@@ -124,7 +124,7 @@ decl_storage! {
             })
             : u32;
         // details of the token corresponding to a token id
-        Tokens get(token_details)
+        pub Tokens get(token_details)
             build(|config: &GenesisConfig<T>| -> Vec<_> {
                 config
                     .initial_tokens
@@ -138,7 +138,7 @@ decl_storage! {
             })
             : map u32 => Erc20Token<T::TokenBalance>;
         // balances mapping for an account and token
-        BalanceOf get(balance_of)
+        pub BalanceOf get(balance_of)
             build(|config: &GenesisConfig<T>| -> Vec<_> {
                 config
                     .initial_tokens
@@ -152,7 +152,7 @@ decl_storage! {
             })
             : map (u32, T::AccountId) => T::TokenBalance;
         // allowance for an account and token
-        Allowance get(allowance): map (u32, T::AccountId, T::AccountId) => T::TokenBalance;
+        pub Allowance get(allowance): map (u32, T::AccountId, T::AccountId) => T::TokenBalance;
     }
 
     add_extra_genesis {
