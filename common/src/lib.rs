@@ -26,7 +26,7 @@ pub fn parse_key_256(imp: &str) -> Result<[u8; 32], &'static str> {
     let imp: &[u8] = if imp.starts_with(b"0x") {
         &imp[2..]
     } else {
-        return Err("public key shoud be prefixed with '0x'");
+        return Err("public key should be prefixed with '0x'");
     };
 
     // check key is correct len
