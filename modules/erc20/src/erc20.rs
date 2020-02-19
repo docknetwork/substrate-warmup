@@ -83,19 +83,35 @@ decl_module! {
         }
 
         // the ERC20 standard transfer_from function
-        // implemented in the open-zeppelin way - increase/decrease allownace
+        // implemented in the open-zeppelin way - increase/decrease allowance
         // if approved, transfer from an account to another account without owner's signature
         pub fn transfer_from(_origin, token_id: u32, from: T::AccountId, to: T::AccountId, value: T::TokenBalance) -> Result {
+            // `<Allowance<T>>::exists` and `Self::allowance` will result in 2 calls. The following
+            // sacrifices efficiency for giving clear error message. In practice, call to `Self::allowance`
+            // should be sufficient.
             ensure!(<Allowance<T>>::exists((token_id, from.clone(), to.clone())), "Allowance does not exist.");
             let allowance = Self::allowance((token_id, from.clone(), to.clone()));
+
             ensure!(allowance >= value, "Not enough allowance.");
 
+            // Following code checks if `to` is allowed to get `value` amount of tokens, if it is
+            // then transfer the tokens and decrease `to`'s allowance. An cleaner alternate
+            // would have been to have a separate function `has_sufficient_balance` that checks if
+            // `from` has sufficient tokens so that both checks, for allowance and sufficient balance can
+            // be done before doing any write
+
+            // Check if `to` is allowed to get sufficient tokens
             // using checked_sub (safe math) to avoid overflow
             let updated_allowance = allowance.checked_sub(&value).ok_or("overflow in calculating allowance")?;
-            <Allowance<T>>::insert((token_id, from.clone(), to.clone()), updated_allowance);
 
-            Self::deposit_event(RawEvent::Approval(token_id, from.clone(), to.clone(), value));
-            Self::_transfer(token_id, from, to, value)
+            // Perform token transfer
+            Self::_transfer(token_id, from.clone(), to.clone(), value)?;
+
+            // Since token transfer was successful, decrease the allowance
+            <Allowance<T>>::insert((token_id, from.clone(), to.clone()), updated_allowance);
+            Self::deposit_event(RawEvent::Approval(token_id, from, to, value));
+
+            Ok(())
         }
 
         // permanently discard, throw away tokens
@@ -681,7 +697,6 @@ mod test {
     }
 
     #[test]
-    #[ignore] // https://github.com/docknetwork/substrate-warmup/issues/42
     fn approve_transfer_from_fail_then_succeed() {
         new_test_ext().execute_with(|| {
             TemplateModule::init(Origin::ROOT, A, b"Trash".to_vec(), b"TRS".to_vec(), 10).unwrap();
